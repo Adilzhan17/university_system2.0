@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Образовательный центр{% endblock %} · ЕНТ Подготовка</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    {% block extra_head %}{% endblock %}
+    <style>
+        .brand-badge { width: 32px; height: 32px; border-radius: 8px; background: var(--bs-primary); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; margin-right: .5rem; }
+        .navbar-brand small { opacity: .7; font-weight: 500; }
+        .flash-container .alert { margin-bottom: .5rem; }
+        .surface { background: #fff; border: 1px solid rgba(0,0,0,.06); border-radius: .75rem; padding: 1rem; }
+        body { font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+        .navbar-dark { background: linear-gradient(90deg, #0d6efd, #6610f2); }
+    </style>
+    {% block head_scripts %}{% endblock %}
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+</head>
+<body class="bg-light">
+    {% if request.endpoint != 'login' %}
+    <header class="navbar navbar-dark sticky-top bg-dark shadow-sm">
+      <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center" href="{{ url_for('dashboard') }}">
+          <span class="brand-badge">ЕНТ</span>
+          <span>Подготовка к ЕНТ <small class="ms-1">Образовательный центр</small></span>
+        </a>
+        <div class="d-flex align-items-center gap-2">
+          <button class="btn btn-outline-light btn-sm" id="themeToggle" type="button" title="Тема">
+            <i class="bi bi-moon-stars"></i>
+          </button>
+          {% if session.get('user') %}
+          <span class="text-light small d-none d-md-inline">{{ session.get('user') }}</span>
+          <a class="btn btn-light btn-sm" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-right"></i></a>
+          {% endif %}
+          <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sideNav" aria-controls="sideNav" aria-label="Меню">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+        </div>
+      </div>
+    </header>
+    {% endif %}
+
+    <div class="container-fluid">
+      <div class="row">
+        {% if request.endpoint != 'login' %}
+        <nav id="sideNav" class="col-lg-2 col-xl-2 d-lg-block bg-body-tertiary border-end min-vh-100 offcanvas-lg offcanvas-start" tabindex="-1">
+          <div class="offcanvas-header d-lg-none">
+            <h5 class="offcanvas-title">Меню</h5>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body p-0">
+            <ul class="nav flex-column py-3">
+              <li class="nav-item"><a class="nav-link link-body-emphasis d-flex align-items-center px-3 {% if request.endpoint == 'dashboard' %}active text-primary{% endif %}" href="{{ url_for('dashboard') }}"><i class="bi bi-speedometer2 me-2"></i>Главная</a></li>
+              <li class="nav-item"><a class="nav-link link-body-emphasis d-flex align-items-center px-3 {% if request.endpoint == 'students' %}active text-primary{% endif %}" href="{{ url_for('students') }}"><i class="bi bi-people me-2"></i>Студенты</a></li>
+              <li class="nav-item"><a class="nav-link link-body-emphasis d-flex align-items-center px-3 {% if request.endpoint == 'groups' %}active text-primary{% endif %}" href="{{ url_for('groups') }}"><i class="bi bi-diagram-3 me-2"></i>Группы</a></li>
+              <li class="nav-item"><a class="nav-link link-body-emphasis d-flex align-items-center px-3 {% if request.endpoint == 'courses' %}active text-primary{% endif %}" href="{{ url_for('courses') }}"><i class="bi bi-journal-text me-2"></i>Курсы</a></li>
+              <li class="nav-item"><a class="nav-link link-body-emphasis d-flex align-items-center px-3 {% if request.endpoint == 'lectures' %}active text-primary{% endif %}" href="{{ url_for('lectures') }}"><i class="bi bi-mic me-2"></i>Лекторы</a></li>
+              <li class="nav-item"><a class="nav-link link-body-emphasis d-flex align-items-center px-3 {% if request.endpoint == 'employees' %}active text-primary{% endif %}" href="{{ url_for('employees') }}"><i class="bi bi-person-workspace me-2"></i>Сотрудники</a></li>
+              <li class="nav-item"><a class="nav-link link-body-emphasis d-flex align-items-center px-3 {% if request.endpoint == 'departments' %}active text-primary{% endif %}" href="{{ url_for('departments') }}"><i class="bi bi-building me-2"></i>Отделы</a></li>
+              <li class="nav-item"><a class="nav-link link-body-emphasis d-flex align-items-center px-3 {% if request.endpoint == 'course_registration' %}active text-primary{% endif %}" href="{{ url_for('course_registration') }}"><i class="bi bi-clipboard-check me-2"></i>Запись на курс</a></li>
+              <li class="nav-item"><a class="nav-link link-body-emphasis d-flex align-items-center px-3 {% if request.endpoint == 'materials' %}active text-primary{% endif %}" href="{{ url_for('materials') }}"><i class="bi bi-folder2-open me-2"></i>Материалы</a></li>
+              <li class="nav-item"><a class="nav-link link-body-emphasis d-flex align-items-center px-3 {% if request.endpoint == 'tests' or request.endpoint == 'available_tests' %}active text-primary{% endif %}" href="{{ url_for('tests') }}"><i class="bi bi-ui-checks-grid me-2"></i>Тесты</a></li>
+              {% if current_user_obj and current_user_obj.role == 'admin' %}
+              <li class="nav-item"><a class="nav-link link-body-emphasis d-flex align-items-center px-3 {% if request.endpoint == 'users_admin' %}active text-primary{% endif %}" href="{{ url_for('users_admin') }}"><i class="bi bi-people-gear me-2"></i>Пользователи</a></li>
+              {% endif %}
+            </ul>
+          </div>
+        </nav>
+        {% endif %}
+
+        <main class="{{ 'col-12 py-4' if request.endpoint == 'login' else 'col-lg-10 col-xl-10 py-4' }}">
+          <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1080;"></div>
+          {% with messages = get_flashed_messages() %}
+            {% if messages %}
+              <div id="_flash_messages" class="d-none">{% for message in messages %}<div class="_msg">{{ message }}</div>{% endfor %}</div>
+            {% endif %}
+          {% endwith %}
+          {% block content %}{% endblock %}
+          {% if request.endpoint != 'login' %}
+          <footer class="pt-4 text-muted small">
+            <div>Образовательный центр подготовки к ЕНТ</div>
+          </footer>
+          {% endif %}
+        </main>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+    {% block body_scripts %}{% endblock %}
+</body>
+</html>
+

@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Группы{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h1 class="mb-0">Группы</h1>
+  <div class="w-auto">
+    <input type="text" class="form-control form-control-sm" placeholder="Поиск" data-table-filter="#groupsTable">
+  </div>
+  </div>
+
+<div class="card mb-4">
+  <div class="card-header"><h5 class="mb-0">Добавить группу</h5></div>
+  <div class="card-body">
+    <form method="POST">
+      <div class="mb-3">
+        <label for="name" class="form-label">Название группы</label>
+        <input type="text" class="form-control" id="name" name="name" required>
+      </div>
+      <div class="mb-3">
+        <label for="description" class="form-label">Описание</label>
+        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Добавить</button>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><h5 class="mb-0">Список групп</h5></div>
+  <div class="card-body">
+    {% if groups %}
+      <div class="table-responsive">
+        <table id="groupsTable" class="table table-striped align-middle">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Название</th>
+              <th>Описание</th>
+              <th>Студентов</th>
+              <th>Курсы</th>
+              <th>Действия</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for group in groups %}
+            <tr>
+              <td>{{ group.id }}</td>
+              <td>{{ group.name }}</td>
+              <td>{{ group.description or '-' }}</td>
+              <td>{{ group.students|length }}</td>
+              <td>
+                {% if group.courses %}
+                  {% for course in group.courses %}
+                    <span class="badge bg-secondary">{{ course.title }}</span>
+                  {% endfor %}
+                {% else %}
+                  <span class="text-muted">Нет курсов</span>
+                {% endif %}
+              </td>
+              <td>
+                <a href="{{ url_for('edit_group', id=group.id) }}" class="btn btn-sm btn-warning me-2">Изменить</a>
+                <a href="{{ url_for('delete_group', id=group.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Удалить группу?')">Удалить</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-muted mb-0">Групп пока нет.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ 'Редактировать сотрудника' if employee else 'Новый сотрудник' }}{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">{{ 'Редактировать сотрудника' if employee else 'Добавить сотрудника' }}</h1>
+
+<div class="card">
+  <div class="card-body">
+    <form method="POST">
+      <div class="mb-3">
+        <label for="name" class="form-label">Имя</label>
+        <input type="text" class="form-control" id="name" name="name" value="{{ employee.name if employee else '' }}" required>
+      </div>
+      <div class="mb-3">
+        <label for="position" class="form-label">Должность</label>
+        <input type="text" class="form-control" id="position" name="position" value="{{ employee.position if employee else '' }}">
+      </div>
+      <div class="mb-3">
+        <label for="department_id" class="form-label">Отдел</label>
+        <select class="form-select" id="department_id" name="department_id" required>
+          {% for dept in departments %}
+            <option value="{{ dept.id }}" {% if employee and employee.department_id == dept.id %}selected{% endif %}>{{ dept.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Сохранить</button>
+      <a href="{{ url_for('employees') }}" class="btn btn-secondary">Отмена</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

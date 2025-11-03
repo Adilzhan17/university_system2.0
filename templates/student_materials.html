@@ -1,0 +1,41 @@
+{% extends 'student_base.html' %}
+
+{% block title %}Материалы{% endblock %}
+
+{% block content %}
+<h1 class="mb-3">Материалы</h1>
+
+<div class="card">
+  <div class="card-body">
+    {% if materials %}
+      <div class="table-responsive">
+        <table class="table table-striped align-middle">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Название</th>
+              <th>Курс</th>
+              <th>Дата</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for m in materials %}
+              <tr>
+                <td>{{ m.id }}</td>
+                <td>{{ m.title }}</td>
+                <td>{{ m.course.title }}</td>
+                <td>{{ m.created_at.strftime('%Y-%m-%d %H:%M') if m.created_at else '-' }}</td>
+                <td><a class="btn btn-sm btn-outline-primary" href="{{ url_for('download_material', material_id=m.id) }}">Скачать</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-muted mb-0">Материалов пока нет.</p>
+    {% endif %}
+  </div>
+  </div>
+{% endblock %}
+

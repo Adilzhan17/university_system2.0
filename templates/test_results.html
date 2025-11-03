@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Результаты: {{ test.title }}{% endblock %}
+
+{% block content %}
+<h1 class="mb-3">Результаты: {{ test.title }}</h1>
+
+<div class="card">
+  <div class="card-body">
+    {% if attempts %}
+      <div class="table-responsive">
+        <table class="table table-striped align-middle">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Студент</th>
+              <th>Начат</th>
+              <th>Завершён</th>
+              <th>Баллы</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for a in attempts %}
+              <tr>
+                <td>{{ a.id }}</td>
+                <td>{{ a.student.name if a.student else '-' }}</td>
+                <td>{{ a.started_at.strftime('%Y-%m-%d %H:%M') if a.started_at else '-' }}</td>
+                <td>{{ a.finished_at.strftime('%Y-%m-%d %H:%M') if a.finished_at else '-' }}</td>
+                <td>{{ a.score }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-muted mb-0">Пока нет попыток.</p>
+    {% endif %}
+  </div>
+  </div>
+{% endblock %}
+

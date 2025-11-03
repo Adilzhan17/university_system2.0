@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Прохождение теста{% endblock %}
+
+{% block content %}
+<h1 class="mb-3">{{ test.title }}</h1>
+<div class="mb-2 text-muted">Курс: {{ test.course.title }}</div>
+
+<form method="POST" action="{{ url_for('submit_test', test_id=test.id) }}">
+  <ol>
+    {% for q in test.questions %}
+    <li class="mb-3">
+      <div class="fw-semibold mb-2">{{ q.text }}</div>
+      {% for o in q.options %}
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="question_{{ q.id }}" id="q{{ q.id }}o{{ o.id }}" value="{{ o.id }}">
+        <label class="form-check-label" for="q{{ q.id }}o{{ o.id }}">{{ o.text }}</label>
+      </div>
+      {% endfor %}
+    </li>
+    {% endfor %}
+  </ol>
+  <button type="submit" class="btn btn-primary">Сдать</button>
+  <a href="{{ url_for('tests') }}" class="btn btn-outline-secondary">Отмена</a>
+</form>
+{% endblock %}
+

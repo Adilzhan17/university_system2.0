@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Редактировать лектора{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Редактировать лектора</h1>
+
+<div class="card">
+  <div class="card-body">
+    <form method="POST">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Имя</label>
+          <input type="text" class="form-control" name="name" value="{{ lecture.name }}" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Фамилия</label>
+          <input type="text" class="form-control" name="surname" value="{{ lecture.surname }}" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Должность/титул</label>
+          <input type="text" class="form-control" name="title" value="{{ lecture.title }}">
+        </div>
+        <div class="col-md-12">
+          <label class="form-label">Описание</label>
+          <textarea class="form-control" name="description" rows="3">{{ lecture.description }}</textarea>
+        </div>
+      </div>
+      <div class="mt-3">
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <a href="{{ url_for('lectures') }}" class="btn btn-secondary">Отмена</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

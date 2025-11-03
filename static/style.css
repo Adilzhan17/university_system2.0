@@ -1,0 +1,84 @@
+/* Minimal, Bootstrap-friendly tweaks */
+:root {
+  --us-surface: #ffffff;
+  --us-border: rgba(0,0,0,.08);
+}
+
+body {
+  /* Blue everywhere: subtle multi‑stop blue gradient */
+  background: radial-gradient(1200px 600px at -10% -20%, rgba(13,110,253,.25) 0, transparent 55%),
+              radial-gradient(1000px 500px at 110% 10%, rgba(102,16,242,.22) 0, transparent 60%),
+              linear-gradient(180deg, #e8f0fe, #e8f0fe);
+}
+
+.surface {
+  background-color: var(--us-surface);
+  border: 1px solid var(--us-border);
+  border-radius: .75rem;
+  padding: 1rem;
+  box-shadow: 0 .25rem 1rem rgba(0,0,0,.05);
+}
+
+.table thead th {
+  background: #f2f4f8;
+  border-bottom: 1px solid var(--us-border);
+}
+
+.table tbody tr:hover {
+  background: #fafbfe;
+}
+
+.form-control, .form-select {
+  border-color: var(--us-border);
+}
+
+.btn-primary {
+  box-shadow: 0 .125rem .25rem rgba(13,110,253,.15);
+  transition: transform .06s ease, box-shadow .2s ease;
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 .5rem 1.25rem rgba(13,110,253,.25);
+}
+
+.card-title, h1, h2, h3, h4, h5 {
+  letter-spacing: .2px;
+}
+
+[data-bs-theme="dark"] body {
+  /* Deep blue gradient for dark mode */
+  background: radial-gradient(1200px 600px at -10% -20%, rgba(13,110,253,.25) 0, transparent 55%),
+              radial-gradient(1000px 500px at 110% 10%, rgba(102,16,242,.22) 0, transparent 60%),
+              linear-gradient(180deg, #0b132b, #0b132b);
+}
+
+/* Improve contrast in dark mode */
+[data-bs-theme="dark"] .card {
+  background-color: #0e162b;
+  border-color: rgba(255,255,255,.08);
+}
+[data-bs-theme="dark"] .card-header {
+  background-color: rgba(255,255,255,.04);
+  color: #e9ecef;
+  border-bottom-color: rgba(255,255,255,.08);
+}
+
+[data-bs-theme="dark"] .table thead th {
+  background: rgba(255,255,255,.06);
+  color: #f8f9fa;
+}
+[data-bs-theme="dark"] .table tbody tr:hover {
+  background: rgba(255,255,255,.03);
+}
+
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] .form-select,
+[data-bs-theme="dark"] .form-control:focus,
+[data-bs-theme="dark"] .form-select:focus {
+  background-color: #0b1323;
+  color: #e2e8f0;
+  border-color: rgba(255,255,255,.16);
+}
+[data-bs-theme="dark"] .form-control::placeholder {
+  color: #98a2b3;
+}

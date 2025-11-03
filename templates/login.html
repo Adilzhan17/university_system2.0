@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Вход{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-header text-center">
+        <h3 class="mb-0">Вход в систему</h3>
+      </div>
+      <div class="card-body">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-danger">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        <form method="POST">
+          <div class="mb-3">
+            <label for="username" class="form-label">Имя пользователя</label>
+            <input type="text" class="form-control" id="username" name="username" required>
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Пароль</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Войти</button>
+        </form>
+        <hr>
+        <div class="text-center">
+          <small class="text-muted d-block">Тестовые данные доступа:</small>
+          <small><strong>Логин:</strong> admin · <strong>Пароль:</strong> admin123</small>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+{% endblock %}

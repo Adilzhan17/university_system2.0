@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Редактировать студента{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Редактировать студента</h1>
+
+<div class="card">
+  <div class="card-body">
+    <form method="POST">
+      <div class="mb-3">
+        <label for="name" class="form-label">Имя</label>
+        <input type="text" class="form-control" id="name" name="name" value="{{ student.name }}" required>
+      </div>
+      <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" class="form-control" id="email" name="email" value="{{ student.email }}" required>
+      </div>
+      <div class="mb-3">
+        <label for="group_id" class="form-label">Группа</label>
+        <select class="form-select" id="group_id" name="group_id">
+          <option value="">Без группы</option>
+          {% for group in groups %}
+            <option value="{{ group.id }}" {% if student.group_id == group.id %}selected{% endif %}>{{ group.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Сохранить</button>
+      <a href="{{ url_for('students') }}" class="btn btn-secondary">Отмена</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

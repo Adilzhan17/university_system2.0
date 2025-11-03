@@ -1,0 +1,28 @@
+{% extends 'student_base.html' %}
+
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+<h1 class="mb-3">Добро пожаловать{% if student %}, {{ student.name }}{% endif %}</h1>
+<div class="row g-3">
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="h5">Курсы</div>
+        <div class="display-6">{{ total_courses }}</div>
+      </div>
+      <div class="card-footer bg-transparent"><a href="{{ url_for('student_materials') }}" class="btn btn-sm btn-primary">Материалы</a></div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="h5">Тесты</div>
+        <p class="mb-0">Доступные тесты по вашим курсам</p>
+      </div>
+      <div class="card-footer bg-transparent"><a href="{{ url_for('available_tests') }}" class="btn btn-sm btn-primary">К тестам</a></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

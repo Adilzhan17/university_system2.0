@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Назначение групп{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Назначение групп: {{ course.title }}</h1>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-md-4"><strong>Курс:</strong> {{ course.title }}</div>
+      <div class="col-md-8"><strong>Описание:</strong> {{ course.description or '—' }}</div>
+      <div class="col-12"><strong>Уже назначено групп:</strong> {{ registered_groups|length }}</div>
+    </div>
+  </div>
+</div>
+
+{% if registered_groups %}
+<div class="card mb-4">
+  <div class="card-header"><h5 class="mb-0">Назначенные группы</h5></div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-striped align-middle">
+        <thead>
+          <tr>
+            <th>Название</th>
+            <th>Описание</th>
+            <th>Студентов</th>
+            <th>Действия</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for group in registered_groups %}
+          <tr>
+            <td>{{ group.name }}</td>
+            <td>{{ group.description or '-' }}</td>
+            <td>{{ group.students|length }}</td>
+            <td>
+              <a href="{{ url_for('unregister_group_from_course', course_id=course.id, group_id=group.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Убрать группу из курса?')">Убрать</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<div class="card">
+  <div class="card-header"><h5 class="mb-0">Добавить группы к курсу</h5></div>
+  <div class="card-body">
+    {% if all_groups %}
+      <form method="POST">
+        <div class="row g-2">
+          {% for group in all_groups %}
+            {% if group not in registered_groups %}
+            <div class="col-md-6">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="{{ group.id }}" id="group_{{ group.id }}" name="group_ids">
+                <label class="form-check-label" for="group_{{ group.id }}">
+                  {{ group.name }} <small class="text-muted">({{ group.students|length }} студентов)</small>
+                </label>
+              </div>
+            </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        {% set available_groups = all_groups | reject('in', registered_groups) | list %}
+        <div class="mt-3">
+          {% if available_groups %}
+          <button type="submit" class="btn btn-primary">Назначить выбранные</button>
+          {% else %}
+          <p class="text-muted mb-0">Свободных групп нет.</p>
+          {% endif %}
+        </div>
+      </form>
+    {% else %}
+      <p class="text-muted mb-0">Нет групп. <a href="{{ url_for('groups') }}">Создайте группы</a> и вернитесь сюда.</p>
+    {% endif %}
+    <div class="mt-3">
+      <a href="{{ url_for('course_registration') }}" class="btn btn-secondary">Назад к курсам</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

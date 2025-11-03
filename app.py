@@ -1,0 +1,691 @@
+from flask import Flask, render_template, redirect, url_for, request, flash, session, send_from_directory
+from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
+from functools import wraps
+import os
+
+from extensions import db, migrate
+from models import (
+    User, Student, Course, Group, Lecture, Employee, Department,
+    Material, Test, Question, Option, Attempt, AttemptAnswer
+)
+
+
+app = Flask(__name__)
+app.secret_key = 'secretkey'
+
+# Absolute DB path to avoid CWD confusion
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+DB_PATH = os.path.join(BASE_DIR, 'database.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{DB_PATH}"
+
+# Uploads
+app.config['UPLOAD_FOLDER'] = os.path.join(BASE_DIR, 'uploads')
+ALLOWED_EXTENSIONS = {"pdf", "doc", "docx", "ppt", "pptx", "zip", "rar", "7z", "mp4", "txt"}
+
+db.init_app(app)
+migrate.init_app(app, db)
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+
+# Helpers
+def current_user():
+    username = session.get('user')
+    if not username:
+        return None
+    return User.query.filter_by(username=username).first()
+
+
+@app.context_processor
+def inject_current_user():
+    return {"current_user_obj": current_user()}
+
+
+def require_roles(*roles):
+    def decorator(fn):
+        @wraps(fn)
+        def wrapper(*args, **kwargs):
+            if 'user' not in session:
+                return redirect(url_for('login'))
+            user = current_user()
+            if not user or (roles and user.role not in roles):
+                flash('Доступ запрещён')
+                return redirect(url_for('dashboard'))
+            return fn(*args, **kwargs)
+        return wrapper
+    return decorator
+
+
+def allowed_file(filename: str) -> bool:
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+# CLI: init db
+@app.cli.command('init-db')
+def init_db():
+    db.create_all()
+    if not User.query.filter_by(username='admin').first():
+        admin = User(username='admin', password=generate_password_hash('admin123'), role='admin')
+        db.session.add(admin)
+        db.session.commit()
+    print('Database initialized with admin user.')
+
+
+# Auth
+@app.route('/', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        u = User.query.filter_by(username=request.form['username']).first()
+        if u and check_password_hash(u.password, request.form['password']):
+            session['user'] = u.username
+            return redirect(url_for('dashboard'))
+        flash('Неверные учетные данные')
+    return render_template('login.html')
+
+
+# Student portal: code-only entry
+@app.route('/student-enter', methods=['GET', 'POST'])
+def student_enter():
+    if request.method == 'POST':
+        code = request.form.get('code', '').strip()
+        if not code:
+            flash('Введите код доступа')
+            return redirect(url_for('student_enter'))
+        return redirect(url_for('student_code_login', code=code))
+    return render_template('student_enter.html')
+
+
+def ensure_user_for_student(student: Student) -> User:
+    if student.user:
+        return student.user
+    # create minimal user for student to reuse session machinery
+    username = f"student_{student.id}"
+    # password не используется (вход по коду)
+    u = User(username=username, password=generate_password_hash(os.urandom(8).hex()), role='student')
+    db.session.add(u)
+    db.session.flush()
+    student.user_id = u.id
+    db.session.commit()
+    return u
+
+
+@app.route('/s/<code>')
+def student_code_login(code):
+    student = Student.query.filter_by(access_code=code).first()
+    if not student:
+        flash('Неверный код доступа')
+        return redirect(url_for('student_enter'))
+    u = ensure_user_for_student(student)
+    session['user'] = u.username
+    return redirect(url_for('student_dashboard'))
+
+
+@app.route('/student')
+def student_dashboard():
+    if 'user' not in session:
+        return redirect(url_for('student_enter'))
+    u = current_user()
+    if not u or u.role != 'student':
+        return redirect(url_for('dashboard'))
+    # базовая статистика для студента
+    st = Student.query.filter_by(user_id=u.id).first()
+    total_courses = len(st.group.courses) if st and st.group else 0
+    return render_template('student_dashboard.html', student=st, total_courses=total_courses)
+
+
+@app.route('/student/materials')
+def student_materials():
+    if 'user' not in session:
+        return redirect(url_for('student_enter'))
+    u = current_user()
+    if not u or u.role != 'student':
+        return redirect(url_for('dashboard'))
+    st = Student.query.filter_by(user_id=u.id).first()
+    if not st or not st.group:
+        flash('Студент не привязан к группе')
+        return redirect(url_for('student_dashboard'))
+    course_ids = [c.id for c in st.group.courses]
+    mats = Material.query.filter(Material.course_id.in_(course_ids)).order_by(Material.created_at.desc()).all()
+    return render_template('student_materials.html', materials=mats)
+
+
+@app.route('/student/tests')
+def student_tests():
+    return redirect(url_for('available_tests'))
+
+
+@app.route('/logout')
+def logout():
+    session.pop('user', None)
+    return redirect(url_for('login'))
+
+
+@app.route('/dashboard')
+def dashboard():
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    return render_template(
+        'dashboard.html',
+        total_students=Student.query.count(),
+        total_courses=Course.query.count(),
+        total_groups=Group.query.count(),
+    )
+
+
+# Materials
+@app.route('/materials', methods=['GET'])
+def materials():
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    course_id = request.args.get('course_id', type=int)
+    if course_id:
+        mats = Material.query.filter_by(course_id=course_id).order_by(Material.created_at.desc()).all()
+        course = Course.query.get(course_id)
+    else:
+        mats = Material.query.order_by(Material.created_at.desc()).all()
+        course = None
+    courses = Course.query.all()
+    return render_template('materials.html', materials=mats, courses=courses, selected_course=course, user=current_user())
+
+
+@app.route('/materials/upload', methods=['POST'])
+@require_roles('admin', 'teacher')
+def upload_material():
+    title = request.form.get('title', '').strip()
+    description = request.form.get('description', '').strip()
+    course_id = request.form.get('course_id', type=int)
+    file = request.files.get('file')
+
+    if not title or not course_id or not file:
+        flash('Заполните все поля и выберите файл')
+        return redirect(url_for('materials', course_id=course_id))
+    if not allowed_file(file.filename):
+        flash('Недопустимый тип файла')
+        return redirect(url_for('materials', course_id=course_id))
+
+    filename = secure_filename(file.filename)
+    save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    base, ext = os.path.splitext(filename)
+    i = 1
+    while os.path.exists(save_path):
+        filename = f"{base}_{i}{ext}"
+        save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        i += 1
+    file.save(save_path)
+
+    u = current_user()
+    mat = Material(title=title, description=description, course_id=course_id, file_path=filename, uploaded_by=u.id if u else None)
+    db.session.add(mat)
+    db.session.commit()
+    flash('Материал загружен')
+    return redirect(url_for('materials', course_id=course_id))
+
+
+@app.route('/materials/<int:material_id>/download')
+def download_material(material_id):
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    mat = Material.query.get_or_404(material_id)
+    u = current_user()
+    if u and u.role == 'student':
+        student = Student.query.filter_by(user_id=u.id).first()
+        if not student or not student.group:
+            flash('Нет доступа к материалу')
+            return redirect(url_for('materials', course_id=mat.course_id))
+        course = Course.query.get(mat.course_id)
+        if student.group not in course.groups:
+            flash('Нет доступа к материалу')
+            return redirect(url_for('materials', course_id=mat.course_id))
+    return send_from_directory(app.config['UPLOAD_FOLDER'], mat.file_path, as_attachment=True)
+
+
+# Tests
+@app.route('/tests', methods=['GET', 'POST'])
+def tests():
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    user = current_user()
+    courses = Course.query.all()
+
+    if request.method == 'POST':
+        if not user or user.role not in ('admin', 'teacher'):
+            flash('Недостаточно прав')
+            return redirect(url_for('tests'))
+        title = request.form.get('title', '').strip()
+        course_id = request.form.get('course_id', type=int)
+        is_published = bool(request.form.get('is_published'))
+        if not title or not course_id:
+            flash('Заполните все поля')
+            return redirect(url_for('tests'))
+        t = Test(title=title, course_id=course_id, is_published=is_published)
+        db.session.add(t)
+        db.session.commit()
+        flash('Тест создан')
+        return redirect(url_for('manage_test', test_id=t.id))
+
+    all_tests = Test.query.order_by(Test.created_at.desc()).all()
+    return render_template('tests.html', tests=all_tests, courses=courses, user=user)
+
+
+@app.route('/tests/<int:test_id>', methods=['GET'])
+@require_roles('admin', 'teacher')
+def manage_test(test_id):
+    t = Test.query.get_or_404(test_id)
+    return render_template('test_manage.html', test=t)
+
+
+@app.route('/tests/<int:test_id>/toggle-publish', methods=['POST'])
+@require_roles('admin', 'teacher')
+def toggle_publish_test(test_id):
+    t = Test.query.get_or_404(test_id)
+    t.is_published = not t.is_published
+    db.session.commit()
+    flash('Статус публикации изменён')
+    return redirect(url_for('manage_test', test_id=test_id))
+
+
+@app.route('/tests/<int:test_id>/add-question', methods=['POST'])
+@require_roles('admin', 'teacher')
+def add_question(test_id):
+    t = Test.query.get_or_404(test_id)
+    text = request.form.get('text', '').strip()
+    opt1 = request.form.get('opt1', '').strip()
+    opt2 = request.form.get('opt2', '').strip()
+    opt3 = request.form.get('opt3', '').strip()
+    opt4 = request.form.get('opt4', '').strip()
+    correct = request.form.get('correct')  # '1'..'4'
+    if not text or not opt1 or not opt2 or correct not in {'1','2','3','4'}:
+        flash('Заполните вопрос, минимум 2 варианта и отметьте правильный')
+        return redirect(url_for('manage_test', test_id=t.id))
+    q = Question(test_id=t.id, text=text)
+    db.session.add(q)
+    db.session.flush()
+    options = [opt1, opt2, opt3, opt4]
+    for idx, txt in enumerate(options, start=1):
+        if not txt:
+            continue
+        db.session.add(Option(question_id=q.id, text=txt, is_correct=(str(idx) == correct)))
+    db.session.commit()
+    flash('Вопрос добавлен')
+    return redirect(url_for('manage_test', test_id=t.id))
+
+
+@app.route('/tests/available')
+def available_tests():
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    user = current_user()
+    if not user or user.role != 'student':
+        flash('Доступно только студентам')
+        return redirect(url_for('tests'))
+    student = Student.query.filter_by(user_id=user.id).first()
+    if not student or not student.group:
+        flash('Студент не привязан к группе')
+        return redirect(url_for('tests'))
+    course_ids = [c.id for c in student.group.courses]
+    tlist = Test.query.filter(Test.course_id.in_(course_ids), Test.is_published == True).order_by(Test.created_at.desc()).all()
+    return render_template('tests_available.html', tests=tlist)
+
+
+@app.route('/tests/<int:test_id>/start', methods=['GET'])
+def start_test(test_id):
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    user = current_user()
+    t = Test.query.get_or_404(test_id)
+    if user and user.role == 'student':
+        student = Student.query.filter_by(user_id=user.id).first()
+        if not student or not student.group or t.course not in student.group.courses:
+            flash('Нет доступа к тесту')
+            return redirect(url_for('available_tests'))
+    return render_template('test_take.html', test=t)
+
+
+@app.route('/tests/<int:test_id>/submit', methods=['POST'])
+def submit_test(test_id):
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    user = current_user()
+    t = Test.query.get_or_404(test_id)
+
+    student_id = None
+    if user and user.role == 'student':
+        student = Student.query.filter_by(user_id=user.id).first()
+        if not student:
+            flash('Нет профиля студента')
+            return redirect(url_for('available_tests'))
+        student_id = student.id
+
+    total = len(t.questions)
+    score = 0
+    attempt = Attempt(test_id=t.id, student_id=student_id)
+    db.session.add(attempt)
+    db.session.flush()
+
+    for q in t.questions:
+        sel = request.form.get(f'question_{q.id}')
+        if not sel:
+            continue
+        opt = Option.query.get(int(sel))
+        db.session.add(AttemptAnswer(attempt_id=attempt.id, question_id=q.id, option_id=opt.id))
+        if opt.is_correct:
+            score += 1
+
+    attempt.score = score
+    from datetime import datetime as _dt
+    attempt.finished_at = _dt.utcnow()
+    db.session.commit()
+    return render_template('test_result.html', test=t, attempt=attempt, total=total)
+
+
+@app.route('/tests/<int:test_id>/results')
+@require_roles('admin', 'teacher')
+def test_results(test_id):
+    t = Test.query.get_or_404(test_id)
+    attempts = Attempt.query.filter_by(test_id=test_id).order_by(Attempt.started_at.desc()).all()
+    return render_template('test_results.html', test=t, attempts=attempts)
+
+
+# Users admin (create users and link to students)
+@app.route('/users', methods=['GET', 'POST'])
+@require_roles('admin')
+def users_admin():
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '').strip()
+        role = request.form.get('role', 'student')
+        student_id = request.form.get('student_id', type=int)
+        if not username or not password or role not in ('admin', 'teacher', 'student'):
+            flash('Заполните все поля')
+            return redirect(url_for('users_admin'))
+        if User.query.filter_by(username=username).first():
+            flash('Такой пользователь уже существует')
+            return redirect(url_for('users_admin'))
+        u = User(username=username, password=generate_password_hash(password), role=role)
+        db.session.add(u)
+        db.session.flush()
+        if role == 'student' and student_id:
+            st = Student.query.get(student_id)
+            if st:
+                st.user_id = u.id
+        db.session.commit()
+        flash('Пользователь создан')
+        return redirect(url_for('users_admin'))
+
+    return render_template('users.html', users=User.query.all(), students=Student.query.all())
+
+
+# Existing routes from the original app (entities management)
+
+@app.route('/lectures', methods=['GET', 'POST'])
+@require_roles('admin', 'teacher')
+def lectures():
+    if request.method == 'POST':
+        name = request.form['name']
+        surname = request.form['surname']
+        title = request.form.get('title', '')
+        description = request.form.get('description', '')
+        existing = Lecture.query.filter_by(name=name, surname=surname).first()
+        if existing:
+            flash('Лектор с таким именем уже существует')
+        else:
+            lecture = Lecture(name=name, surname=surname, title=title, description=description)
+            db.session.add(lecture)
+            db.session.commit()
+            flash('Лектор успешно добавлен')
+    return render_template('lectures.html', lectures=Lecture.query.all())
+
+
+@app.route('/lectures/edit/<int:id>', methods=['GET', 'POST'])
+@require_roles('admin', 'teacher')
+def edit_lecture(id):
+    lecture = Lecture.query.get_or_404(id)
+    if request.method == 'POST':
+        lecture.name = request.form['name']
+        lecture.surname = request.form['surname']
+        lecture.title = request.form.get('title', '')
+        lecture.description = request.form.get('description', '')
+        db.session.commit()
+        flash('Лектор обновлён')
+        return redirect(url_for('lectures'))
+    return render_template('edit_lecture.html', lecture=lecture)
+
+
+@app.route('/lectures/delete/<int:id>')
+@require_roles('admin', 'teacher')
+def delete_lecture(id):
+    lecture = Lecture.query.get_or_404(id)
+    db.session.delete(lecture)
+    db.session.commit()
+    flash('Лектор удалён')
+    return redirect(url_for('lectures'))
+
+
+@app.route('/employees')
+@require_roles('admin')
+def employees():
+    return render_template('employees.html', employees=Employee.query.all())
+
+
+@app.route('/employee/add', methods=['GET', 'POST'])
+@require_roles('admin')
+def add_employee():
+    departments = Department.query.all()
+    if request.method == 'POST':
+        name = request.form['name']
+        position = request.form['position']
+        department_id = request.form['department_id']
+        new_employee = Employee(name=name, position=position, department_id=department_id)
+        db.session.add(new_employee)
+        db.session.commit()
+        flash('Сотрудник добавлен!')
+        return redirect(url_for('employees'))
+    return render_template('employee_form.html', departments=departments)
+
+
+@app.route('/employee/edit/<int:employee_id>', methods=['GET', 'POST'])
+@require_roles('admin')
+def edit_employee(employee_id):
+    employee = Employee.query.get_or_404(employee_id)
+    departments = Department.query.all()
+    if request.method == 'POST':
+        employee.name = request.form['name']
+        employee.position = request.form['position']
+        employee.department_id = request.form['department_id']
+        db.session.commit()
+        flash('Сотрудник обновлён!')
+        return redirect(url_for('employees'))
+    return render_template('employee_form.html', employee=employee, departments=departments)
+
+
+@app.route('/employee/delete/<int:employee_id>', methods=['POST'])
+@require_roles('admin')
+def delete_employee(employee_id):
+    employee = Employee.query.get_or_404(employee_id)
+    db.session.delete(employee)
+    db.session.commit()
+    flash('Сотрудник удалён.')
+    return redirect(url_for('employees'))
+
+
+@app.route('/departments', methods=['GET', 'POST'])
+@require_roles('admin')
+def departments():
+    if request.method == 'POST':
+        name = request.form['name']
+        department = Department(name=name)
+        db.session.add(department)
+        db.session.commit()
+        flash('Отдел добавлен!')
+    return render_template('departments.html', departments=Department.query.all())
+
+
+@app.route('/departments/delete/<int:department_id>', methods=['POST'])
+@require_roles('admin')
+def delete_department(department_id):
+    department = Department.query.get_or_404(department_id)
+    db.session.delete(department)
+    db.session.commit()
+    flash('Отдел удалён.')
+    return redirect(url_for('departments'))
+
+
+@app.route('/groups', methods=['GET', 'POST'])
+@require_roles('admin', 'teacher')
+def groups():
+    if request.method == 'POST':
+        name = request.form['name']
+        description = request.form['description']
+        existing = Group.query.filter_by(name=name).first()
+        if existing:
+            flash('Группа с таким именем уже существует')
+        else:
+            group = Group(name=name, description=description)
+            db.session.add(group)
+            db.session.commit()
+            flash('Группа успешно создана')
+    return render_template('groups.html', groups=Group.query.all())
+
+
+@app.route('/groups/delete/<int:id>')
+@require_roles('admin', 'teacher')
+def delete_group(id):
+    group = Group.query.get_or_404(id)
+    # отвяжем студентов, чтобы каскадно не падало
+    for s in group.students:
+        s.group_id = None
+    db.session.delete(group)
+    db.session.commit()
+    flash('Группа удалена')
+    return redirect(url_for('groups'))
+
+
+@app.route('/groups/edit/<int:id>', methods=['GET', 'POST'])
+@require_roles('admin', 'teacher')
+def edit_group(id):
+    group = Group.query.get_or_404(id)
+    if request.method == 'POST':
+        group.name = request.form['name']
+        group.description = request.form['description']
+        db.session.commit()
+        flash('Данные группы обновлены')
+        return redirect(url_for('groups'))
+    return render_template('edit_group.html', group=group)
+
+
+@app.route('/students', methods=['GET', 'POST'])
+@require_roles('admin', 'teacher')
+def students():
+    if request.method == 'POST':
+        name = request.form['name']
+        email = request.form['email']
+        group_id = request.form.get('group_id')
+        if Student.query.filter_by(email=email).first():
+            flash('Студент с таким email уже существует')
+        else:
+            student = Student(name=name, email=email)
+            if group_id:
+                student.group_id = int(group_id)
+            db.session.add(student)
+            db.session.commit()
+            flash('Студент успешно добавлен')
+    return render_template('students.html', students=Student.query.all(), groups=Group.query.all())
+
+
+@app.route('/students/delete/<int:id>')
+@require_roles('admin', 'teacher')
+def delete_student(id):
+    st = Student.query.get_or_404(id)
+    db.session.delete(st)
+    db.session.commit()
+    flash('Студент удалён')
+    return redirect(url_for('students'))
+
+
+@app.route('/students/edit/<int:id>', methods=['GET', 'POST'])
+@require_roles('admin', 'teacher')
+def edit_student(id):
+    st = Student.query.get_or_404(id)
+    if request.method == 'POST':
+        st.name = request.form['name']
+        st.email = request.form['email']
+        group_id = request.form.get('group_id')
+        st.group_id = int(group_id) if group_id else None
+        db.session.commit()
+        flash('Данные студента обновлены')
+        return redirect(url_for('students'))
+    return render_template('edit_student.html', student=st, groups=Group.query.all())
+
+
+@app.route('/courses', methods=['GET', 'POST'])
+@require_roles('admin', 'teacher')
+def courses():
+    if request.method == 'POST':
+        title = request.form['title']
+        description = request.form.get('description', '')
+        db.session.add(Course(title=title, description=description))
+        db.session.commit()
+        flash('Курс успешно создан')
+    return render_template('courses.html', courses=Course.query.all())
+
+
+@app.route('/courses/delete/<int:id>')
+@require_roles('admin', 'teacher')
+def delete_course(id):
+    c = Course.query.get_or_404(id)
+    db.session.delete(c)
+    db.session.commit()
+    flash('Курс удалён')
+    return redirect(url_for('courses'))
+
+
+@app.route('/courses/edit/<int:id>', methods=['GET', 'POST'])
+@require_roles('admin', 'teacher')
+def edit_course(id):
+    c = Course.query.get_or_404(id)
+    if request.method == 'POST':
+        c.title = request.form.get('title', c.title)
+        c.description = request.form.get('description', c.description)
+        db.session.commit()
+        flash('Данные курса обновлены')
+        return redirect(url_for('courses'))
+    return render_template('edit_course.html', course=c)
+
+
+@app.route('/course_registration')
+@require_roles('admin', 'teacher')
+def course_registration():
+    return render_template('course_registration.html', courses=Course.query.all())
+
+
+@app.route('/course/<int:course_id>/register', methods=['GET', 'POST'])
+@require_roles('admin', 'teacher')
+def register_groups_to_course(course_id):
+    course = Course.query.get_or_404(course_id)
+    if request.method == 'POST':
+        group_ids = request.form.getlist('group_ids')
+        for gid in group_ids:
+            g = Group.query.get(int(gid))
+            if g and g not in course.groups:
+                course.groups.append(g)
+        db.session.commit()
+        flash(f"Группы успешно зарегистрированы на курс '{course.title}'")
+        return redirect(url_for('course_registration'))
+    all_groups = Group.query.all()
+    return render_template('register_groups.html', course=course, all_groups=all_groups, registered_groups=course.groups)
+
+
+@app.route('/course/<int:course_id>/unregister/<int:group_id>')
+@require_roles('admin', 'teacher')
+def unregister_group_from_course(course_id, group_id):
+    course = Course.query.get_or_404(course_id)
+    group = Group.query.get_or_404(group_id)
+    if group in course.groups:
+        course.groups.remove(group)
+        db.session.commit()
+        flash(f"Группа '{group.name}' отписана от курса '{course.title}'")
+    return redirect(url_for('register_groups_to_course', course_id=course_id))
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
