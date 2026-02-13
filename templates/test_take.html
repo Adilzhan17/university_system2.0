@@ -1,27 +1,91 @@
-{% extends 'base.html' %}
+{% extends 'student_base.html' if current_user_obj and current_user_obj.role == 'student' else 'base.html' %}
 
 {% block title %}Прохождение теста{% endblock %}
 
 {% block content %}
-<h1 class="mb-3">{{ test.title }}</h1>
-<div class="mb-2 text-muted">Курс: {{ test.course.title }}</div>
+<div class="page-hero mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+  <div>
+    <h1 class="mb-1">{{ test.title }}</h1>
+    <p class="mb-0">Курс: {{ test.course.title }}</p>
+  </div>
+  <div class="d-flex align-items-center gap-2">
+    {% if remaining_seconds is defined and remaining_seconds is not none %}
+    <span class="badge-soft"><i class="bi bi-stopwatch me-1"></i><span id="timerDisplay"></span></span>
+    {% endif %}
+    {% if test.one_way %}<span class="badge-soft"><i class="bi bi-lock me-1"></i>Без возврата</span>{% endif %}
+  </div>
+</div>
 
 <form method="POST" action="{{ url_for('submit_test', test_id=test.id) }}">
-  <ol>
-    {% for q in test.questions %}
-    <li class="mb-3">
-      <div class="fw-semibold mb-2">{{ q.text }}</div>
-      {% for o in q.options %}
-      <div class="form-check">
-        <input class="form-check-input" type="radio" name="question_{{ q.id }}" id="q{{ q.id }}o{{ o.id }}" value="{{ o.id }}">
-        <label class="form-check-label" for="q{{ q.id }}o{{ o.id }}">{{ o.text }}</label>
+  {% if attempt %}
+  <input type="hidden" name="attempt_id" value="{{ attempt.id }}" />
+  {% endif %}
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      <ol class="mb-0">
+        {% for q in test.questions %}
+        <li class="mb-4">
+          <div class="surface p-3 mb-2">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              {% if q.text %}<div class="fw-semibold">{{ q.text }}</div>{% endif %}
+              {% if q.difficulty %}
+                <span class="badge-soft text-uppercase small">{{ q.difficulty }}</span>
+              {% endif %}
+            </div>
+            {% if q.image_path %}
+              <div class="mb-2">
+                <img src="{{ url_for('test_image', filename=q.image_path) }}" alt="question image" class="img-fluid rounded border">
+              </div>
+            {% endif %}
+            {% for o in q.options %}
+            <label class="form-check d-flex align-items-center gap-2 mb-2">
+              <input class="form-check-input" type="radio" name="question_{{ q.id }}" value="{{ o.id }}">
+              <span>
+                {% if o.text %}{{ o.text }}{% endif %}
+                {% if o.image_path %}
+                  <div class="mt-2">
+                    <img src="{{ url_for('test_image', filename=o.image_path) }}" alt="option image" class="img-fluid rounded border">
+                  </div>
+                {% endif %}
+              </span>
+            </label>
+            {% endfor %}
+          </div>
+        </li>
+        {% endfor %}
+      </ol>
+      <div class="d-flex flex-wrap gap-2 justify-content-end">
+        <a href="{{ url_for('available_tests') if current_user_obj and current_user_obj.role == 'student' else url_for('tests') }}" class="btn btn-outline-secondary">Отмена</a>
+        <button type="submit" class="btn btn-primary">Сдать</button>
       </div>
-      {% endfor %}
-    </li>
-    {% endfor %}
-  </ol>
-  <button type="submit" class="btn btn-primary">Сдать</button>
-  <a href="{{ url_for('tests') }}" class="btn btn-outline-secondary">Отмена</a>
+    </div>
+  </div>
 </form>
+{% if remaining_seconds is defined and remaining_seconds is not none %}
+<script>
+  (function(){
+    var remain = {{ remaining_seconds|int }};
+    function fmt(s){
+      var m = Math.floor(s/60), ss = s%60; return m+":"+(ss<10?"0":"")+ss;
+    }
+    function tick(){
+      var el = document.getElementById('timerDisplay');
+      if(el) el.textContent = fmt(remain);
+      if(remain <= 0){
+        document.querySelector('form').submit();
+        return;
+      }
+      remain -= 1;
+      setTimeout(tick, 1000);
+    }
+    setTimeout(tick, 250);
+    {% if test.one_way %}
+    history.pushState(null, document.title, location.href);
+    window.addEventListener('popstate', function () {
+      history.pushState(null, document.title, location.href);
+    });
+    {% endif %}
+  })();
+</script>
+{% endif %}
 {% endblock %}
-

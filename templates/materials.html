@@ -3,8 +3,11 @@
 {% block title %}Материалы{% endblock %}
 
 {% block content %}
-<div class="d-flex align-items-center justify-content-between mb-3">
-  <h1 class="mb-0">Материалы</h1>
+<div class="page-hero mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+  <div>
+    <h1 class="mb-1">Материалы</h1>
+    <p class="mb-0">Все учебные файлы с быстрыми фильтрами по курсам.</p>
+  </div>
   <form class="d-flex gap-2" method="get" action="{{ url_for('materials') }}">
     <select class="form-select form-select-sm" name="course_id" onchange="this.form.submit()">
       <option value="">Все курсы</option>
@@ -13,7 +16,7 @@
       {% endfor %}
     </select>
   </form>
-  </div>
+</div>
 
 {% if user and user.role in ['admin','teacher'] %}
 <div class="card mb-4">
@@ -35,6 +38,18 @@
           </select>
         </div>
         <div class="col-md-4">
+          <label for="material_type" class="form-label">Тип материала</label>
+          <select id="material_type" name="material_type" class="form-select">
+            <option value="">Авто</option>
+            <option value="pdf">PDF</option>
+            <option value="video">Видео</option>
+            <option value="presentation">Презентация</option>
+            <option value="doc">Документ</option>
+            <option value="archive">Архив</option>
+            <option value="other">Другое</option>
+          </select>
+        </div>
+        <div class="col-md-4">
           <label for="file" class="form-label">Файл</label>
           <input type="file" class="form-control" id="file" name="file" required>
         </div>
@@ -51,35 +66,41 @@
   </div>
 {% endif %}
 
-<div class="card">
-  <div class="card-header"><h5 class="mb-0">Список материалов{% if selected_course %} — {{ selected_course.title }}{% endif %}</h5></div>
+<div class="card border-0 shadow-sm">
+  <div class="card-header d-flex align-items-center justify-content-between">
+    <h5 class="mb-0">Список материалов{% if selected_course %} — {{ selected_course.title }}{% endif %}</h5>
+    <span class="text-muted small">{{ materials|length }} элементов</span>
+  </div>
   <div class="card-body">
     {% if materials %}
-      <div class="table-responsive">
-        <table class="table table-striped align-middle">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Название</th>
-              <th>Курс</th>
-              <th>Добавлен</th>
-              <th>Действия</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for m in materials %}
-            <tr>
-              <td>{{ m.id }}</td>
-              <td>{{ m.title }}</td>
-              <td>{{ m.course.title }}</td>
-              <td>{{ m.created_at.strftime('%Y-%m-%d %H:%M') if m.created_at else '-' }}</td>
-              <td>
-                <a href="{{ url_for('download_material', material_id=m.id) }}" class="btn btn-sm btn-outline-primary">Скачать</a>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+      <div class="row g-3">
+        {% for m in materials %}
+        <div class="col-md-4">
+          <div class="surface h-100 p-3 d-flex flex-column">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div class="icon-badge">
+                {% if m.material_type == 'pdf' %}<i class="bi bi-file-earmark-pdf"></i>
+                {% elif m.material_type == 'video' %}<i class="bi bi-camera-reels"></i>
+                {% elif m.material_type == 'presentation' %}<i class="bi bi-slides"></i>
+                {% elif m.material_type == 'doc' %}<i class="bi bi-file-text"></i>
+                {% elif m.material_type == 'archive' %}<i class="bi bi-file-zip"></i>
+                {% else %}<i class="bi bi-file-earmark"></i>{% endif %}
+              </div>
+              <span class="badge-soft text-uppercase small">{{ m.material_type or 'file' }}</span>
+            </div>
+            <h6 class="mb-1">{{ m.title }}</h6>
+            <div class="text-muted small mb-2">Курс: {{ m.course.title }}</div>
+            {% if m.description %}<p class="text-muted small mb-3">{{ m.description }}</p>{% endif %}
+            <div class="mt-auto d-flex justify-content-between align-items-center">
+              <small class="text-muted">{{ m.created_at.strftime('%Y-%m-%d') if m.created_at else '-' }}</small>
+              <div class="d-flex gap-2">
+                <a href="{{ url_for('view_material', material_id=m.id) }}" class="btn btn-outline-primary btn-sm">Открыть</a>
+                <a href="{{ url_for('download_material', material_id=m.id) }}" class="btn btn-primary btn-sm">Скачать</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
       </div>
     {% else %}
       <p class="text-muted mb-0">Материалов пока нет.</p>

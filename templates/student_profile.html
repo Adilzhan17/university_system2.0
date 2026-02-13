@@ -1,0 +1,56 @@
+{% extends 'student_base.html' %}
+
+{% block title %}Профиль{% endblock %}
+
+{% block content %}
+<div class="page-hero mb-4">
+  <h1 class="mb-1">Мой профиль</h1>
+  <p class="mb-0">Основные данные студента и доступы.</p>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header"><strong>Данные</strong></div>
+      <div class="card-body">
+        <div class="mb-3">
+          <div class="text-muted small">ФИО</div>
+          <div class="fw-semibold">{{ student.name }}</div>
+        </div>
+        <div class="mb-3">
+          <div class="text-muted small">Email</div>
+          <div class="fw-semibold">{{ student.email }}</div>
+        </div>
+        <div class="mb-3">
+          <div class="text-muted small">Группа</div>
+          <div class="fw-semibold">{{ student.group.name if student.group else 'Не назначена' }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header"><strong>Предметы группы</strong></div>
+      <div class="card-body">
+        {% if student.group and student.group.courses %}
+          <div class="row g-2">
+            {% for c in student.group.courses %}
+            <div class="col-md-6">
+              <div class="surface p-3 h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                  <div class="fw-semibold">{{ c.title }}</div>
+                  <i class="bi bi-journal-text"></i>
+                </div>
+                {% if c.description %}<div class="text-muted small mt-2">{{ c.description }}</div>{% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-muted">Предметы пока не назначены.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

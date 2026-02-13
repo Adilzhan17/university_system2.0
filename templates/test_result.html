@@ -1,0 +1,23 @@
+{% extends 'student_base.html' if current_user_obj and current_user_obj.role == 'student' else 'base.html' %}
+
+{% block title %}Результат: {{ test.title }}{% endblock %}
+
+{% block content %}
+<h1 class="mb-3">Результат теста: {{ test.title }}</h1>
+
+<div class="card">
+  <div class="card-body">
+    <p class="mb-2"><strong>Всего вопросов:</strong> {{ total }}</p>
+    <p class="mb-3"><strong>Правильных ответов:</strong> {{ attempt.score if attempt else score }}</p>
+
+    {% if attempt %}
+      <p class="mb-1 text-muted">Начат: {{ attempt.started_at.strftime('%Y-%m-%d %H:%M') if attempt.started_at }}</p>
+      <p class="mb-0 text-muted">Завершен: {{ attempt.finished_at.strftime('%Y-%m-%d %H:%M') if attempt.finished_at }}</p>
+    {% else %}
+      <div class="alert alert-info mb-0">Просмотр без сохранения (превью для преподавателя).</div>
+    {% endif %}
+  </div>
+</div>
+
+<a href="{{ url_for('available_tests') if current_user_obj and current_user_obj.role == 'student' else url_for('tests') }}" class="btn btn-outline-secondary mt-3">Назад</a>
+{% endblock %}

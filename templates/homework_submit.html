@@ -1,0 +1,100 @@
+{% extends 'student_base.html' %}
+
+{% block title %}Домашнее задание{% endblock %}
+
+{% block content %}
+<div class="page-hero mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+  <div>
+    <h1 class="mb-1">{{ test.title }}</h1>
+    <p class="mb-0">Курс: {{ test.course.title }}</p>
+  </div>
+  {% if test.due_at %}
+  <div class="d-flex gap-2 align-items-center flex-wrap">
+    <div class="badge-soft"><i class="bi bi-calendar2-event me-1"></i>{{ test.due_at.strftime('%Y-%m-%d %H:%M') }}</div>
+    <div class="badge-soft"><i class="bi bi-hourglass-split me-1"></i><span id="hwTimer" data-remaining="{{ remaining_seconds or 0 }}"></span></div>
+  </div>
+  {% endif %}
+</div>
+
+{% if test.homework_text %}
+<div class="card border-0 shadow-sm mb-3">
+  <div class="card-body">
+    <div class="fw-semibold mb-1">Задание</div>
+    <div class="text-muted">{{ test.homework_text }}</div>
+    {% if test.homework_file_path %}
+      <div class="mt-2">
+        <a class="btn btn-outline-primary btn-sm" href="{{ url_for('homework_attachment', test_id=test.id) }}">Скачать файл</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    {% if is_late %}
+      <div class="alert alert-warning mb-3">Дедлайн прошёл. Отправка закрыта.</div>
+    {% endif %}
+
+    {% if submission %}
+      <div class="mb-3">
+        <div class="fw-semibold mb-1">Последняя отправка</div>
+        <div class="text-muted small">{{ submission.submitted_at.strftime('%Y-%m-%d %H:%M') if submission.submitted_at else '-' }}</div>
+        {% if submission.score is not none %}
+          <div class="mt-2"><strong>Балл:</strong> {{ submission.score }}</div>
+        {% endif %}
+        {% if submission.text %}<div class="mt-2">{{ submission.text }}</div>{% endif %}
+        {% if submission.file_path %}
+          <div class="mt-2">
+            <a class="btn btn-outline-primary btn-sm" href="{{ url_for('homework_download', submission_id=submission.id) }}">Скачать файл</a>
+          </div>
+        {% endif %}
+      </div>
+      <hr>
+    {% endif %}
+
+    <form method="POST" enctype="multipart/form-data">
+      <div class="mb-3">
+        <label class="form-label" for="text">Текст ответа</label>
+        <textarea id="text" name="text" class="form-control" rows="3" {% if is_late %}disabled{% endif %}></textarea>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="file">Файл</label>
+        <input id="file" name="file" type="file" class="form-control" {% if is_late %}disabled{% endif %}>
+      </div>
+      <div class="d-flex justify-content-end">
+        <button type="submit" class="btn btn-primary" {% if is_late %}disabled{% endif %}>Отправить</button>
+      </div>
+    </form>
+  </div>
+  </div>
+
+{% if test.due_at %}
+<script>
+  (function(){
+    function fmt(sec){
+      if (sec <= 0) return 'Дедлайн прошёл';
+      var d = Math.floor(sec / 86400);
+      var h = Math.floor((sec % 86400) / 3600);
+      var m = Math.floor((sec % 3600) / 60);
+      var s = sec % 60;
+      var parts = [];
+      if (d) parts.push(d + 'д');
+      if (h || d) parts.push(h + 'ч');
+      if (m || h || d) parts.push(m + 'м');
+      parts.push(s + 'с');
+      return 'Осталось: ' + parts.join(' ');
+    }
+    function tick(){
+      var el = document.getElementById('hwTimer');
+      if (!el) return;
+      var remain = parseInt(el.getAttribute('data-remaining') || '0', 10);
+      el.textContent = fmt(remain);
+      if (remain > 0) el.setAttribute('data-remaining', remain - 1);
+      setTimeout(tick, 1000);
+    }
+    tick();
+  })();
+</script>
+{% endif %}
+{% endblock %}

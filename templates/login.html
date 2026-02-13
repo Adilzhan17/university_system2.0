@@ -3,38 +3,273 @@
 {% block title %}Вход{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-md-6 col-lg-5">
-    <div class="card shadow-sm">
-      <div class="card-header text-center">
-        <h3 class="mb-0">Вход в систему</h3>
-      </div>
-      <div class="card-body">
-        {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            {% for message in messages %}
-              <div class="alert alert-danger">{{ message }}</div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
-        <form method="POST">
-          <div class="mb-3">
-            <label for="username" class="form-label">Имя пользователя</label>
-            <input type="text" class="form-control" id="username" name="username" required>
+   </div>
+<div class="login-page">
+  <section class="hero-block" id="home">
+    <div class="section-inner">
+      <nav class="login-nav">
+        <div class="login-brand">
+          <span class="brand-mark"><i class="bi bi-mortarboard"></i></span>
+          <div>
+            <div>{% if current_lang == 'kz' %}Білім беру орталығы{% else %}Образовательный центр{% endif %}</div>
+            <small class="text-muted">{% if current_lang == 'kz' %}ҰБТ дайындығы{% else %}Подготовка к ЕНТ{% endif %}</small>
           </div>
-          <div class="mb-3">
-            <label for="password" class="form-label">Пароль</label>
-            <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+        <div class="nav-links">
+          <a href="#about">{% if current_lang == 'kz' %}Орталық туралы{% else %}О центре{% endif %}</a>
+          <a href="#infra">{% if current_lang == 'kz' %}Инфрақұрылым{% else %}Инфраструктура{% endif %}</a>
+          <a href="#services">{% if current_lang == 'kz' %}Қызметтер{% else %}Услуги{% endif %}</a>
+          <a href="#contact">{% if current_lang == 'kz' %}Байланыс{% else %}Контакты{% endif %}</a>
+        </div>
+        <div class="nav-actions">
+          <a class="ghost-btn" href="{{ url_for('set_lang', lang='kz', next=request.full_path) }}">Қаз</a>
+          <a class="ghost-btn" href="{{ url_for('set_lang', lang='ru', next=request.full_path) }}">Рус</a>
+          <a class="btn btn-primary" href="#login">{% if current_lang == 'kz' %}Кіру{% else %}Войти{% endif %}</a>
+        </div>
+      </nav>
+
+      <div class="hero-grid">
+        <div>
+          <span class="hero-pill">{% if current_lang == 'kz' %}Біртұтас оқу платформасы{% else %}Единая платформа обучения{% endif %}</span>
+          <h1 class="hero-title">{% if current_lang == 'kz' %}ҰБТ-ға дайындық пен топтарды басқару — бір жүйеде{% else %}Подготовка к ЕНТ и управление группами в одном окне{% endif %}</h1>
+          <p class="hero-subtitle">{% if current_lang == 'kz' %}Материалдар, тесттер, аналитика және студенттерді сүйемелдеу — ұстаздар мен оқушыларға арналған барлық құралдар бір кеңістікте.{% else %}Материалы, тесты, аналитика и сопровождение студентов — все инструменты для преподавателей и учеников в едином пространстве.{% endif %}</p>
+          <div class="hero-actions">
+            <a href="#login" class="btn btn-primary">{% if current_lang == 'kz' %}Бастау{% else %}Начать работу{% endif %}</a>
+            <a href="#about" class="ghost-btn">{% if current_lang == 'kz' %}Платформа туралы{% else %}О платформе{% endif %}</a>
           </div>
-          <button type="submit" class="btn btn-primary w-100">Войти</button>
-        </form>
-        <hr>
-        <div class="text-center">
-          <small class="text-muted d-block">Тестовые данные доступа:</small>
-          <small><strong>Логин:</strong> admin · <strong>Пароль:</strong> admin123</small>
+          <div class="hero-metrics">
+            <div class="metric-card">
+              <div class="metric-value">8 000+</div>
+              <div class="metric-label">{% if current_lang == 'kz' %}материал{% else %}материалов{% endif %}</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-value">120+</div>
+              <div class="metric-label">{% if current_lang == 'kz' %}курс{% else %}курсов{% endif %}</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-value">15 000</div>
+              <div class="metric-label">{% if current_lang == 'kz' %}тест тапсырылған{% else %}тестов пройдено{% endif %}</div>
+            </div>
+          </div>
+        </div>
+        <div class="hero-panel">
+          <div class="login-card" id="login">
+            <div class="mb-3 text-center">
+              <h3 class="mb-1">{% if current_lang == 'kz' %}Жүйеге кіру{% else %}Вход в систему{% endif %}</h3>
+              <p class="text-muted mb-0">{% if current_lang == 'kz' %}Платформамен жұмысты бастаңыз{% else %}Начните работу с платформой{% endif %}</p>
+            </div>
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                {% for message in messages %}
+                  <div class="alert alert-info">{{ message }}</div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+            <form method="POST" class="mb-3">
+              <div class="mb-3">
+                <label for="username" class="form-label">{% if current_lang == 'kz' %}Пайдаланушы аты{% else %}Имя пользователя{% endif %}</label>
+                <input type="text" class="form-control" id="username" name="username" placeholder="admin" required>
+              </div>
+              <div class="mb-3">
+                <label for="password" class="form-label">{% if current_lang == 'kz' %}Құпиясөз{% else %}Пароль{% endif %}</label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="admin123" required>
+              </div>
+              <button type="submit" class="btn btn-primary w-100">{% if current_lang == 'kz' %}Кіру{% else %}Войти{% endif %}</button>
+            </form>
+            <div class="text-center small mb-3">
+              <a href="{{ url_for('student_reset_password') }}">
+                {% if current_lang == 'kz' %}Құпиясөзді ұмыттыңыз ба?{% else %}Забыли пароль?{% endif %}
+              </a>
+            </div>
+            <div class="text-center small mb-3">
+              <a href="{{ url_for('student_access_request') }}">
+                {% if current_lang == 'kz' %}Қатынауға сұрау{% else %}Запросить доступ{% endif %}
+              </a>
+            </div>
+            <div class="d-flex align-items-center justify-content-between glass p-3 rounded-4">
+              <div>
+                <small class="text-muted d-block">{% if current_lang == 'kz' %}Тест деректері:{% else %}Тестовые данные:{% endif %}</small>
+                <small><strong>{% if current_lang == 'kz' %}Логин:{% else %}Логин:{% endif %}</strong> admin · <strong>{% if current_lang == 'kz' %}Құпиясөз:{% else %}Пароль:{% endif %}</strong> admin123</small>
+              </div>
+              <span class="badge-soft">{% if current_lang == 'kz' %}Демо{% else %}Демо{% endif %}</span>
+            </div>
+          </div>
+          <div class="hero-glass">
+            <div class="pulse-dot"></div>
+            <div class="mt-3 text-center small">{% if current_lang == 'kz' %}Тұрақты қолжетімділік 24/7{% else %}Стабильный доступ 24/7{% endif %}</div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-  </div>
+  </section>
+
+  <section class="section-dark" id="about">
+    <div class="section-inner">
+      <div class="row g-4 align-items-center">
+        <div class="col-lg-6">
+          <div class="image-card">
+            <div class="overlay-card">
+              <div class="fw-semibold">Платформа, которая объединяет преподавателей и студентов</div>
+              <small class="text-muted">Единая экосистема обучения</small>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <span class="hero-pill">{% if current_lang == 'kz' %}Орталық туралы{% else %}О центре{% endif %}</span>
+          <h2 class="section-title">{% if current_lang == 'kz' %}Заманауи білім беру хабы{% else %}Современный образовательный хаб{% endif %}</h2>
+          <p class="section-subtitle">{% if current_lang == 'kz' %}Біз материал жүктеуден бастап прогресті талдауға дейін толық цифрлық тәжірибе ұсынамыз. Ашық есептер, икемді тесттер және жеке ұсыныстар.{% else %}Мы создаем удобный цифровой опыт: от загрузки материалов до анализа прогресса. Прозрачные отчеты, гибкие тесты и персональные рекомендации.{% endif %}</p>
+          <div class="d-flex flex-wrap gap-2">
+            <span class="chip">{% if current_lang == 'kz' %}Жеке оқу траекториялары{% else %}Персональные траектории{% endif %}</span>
+            <span class="chip">{% if current_lang == 'kz' %}Икемді тесттер{% else %}Гибкие тесты{% endif %}</span>
+            <span class="chip">{% if current_lang == 'kz' %}Ақылды аналитика{% else %}Умная аналитика{% endif %}</span>
+            <span class="chip">{% if current_lang == 'kz' %}Қауіпсіз қолжетімділік{% else %}Безопасный доступ{% endif %}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-dark" id="infra">
+    <div class="section-inner">
+      <div class="text-center">
+        <span class="hero-pill">{% if current_lang == 'kz' %}Инфрақұрылым{% else %}Инфраструктура{% endif %}</span>
+        <h2 class="section-title">{% if current_lang == 'kz' %}Платформаның негізгі мүмкіндіктері{% else %}Ключевые возможности платформы{% endif %}</h2>
+        <p class="section-subtitle">{% if current_lang == 'kz' %}Оқытушылар мен студенттерге қолжетімді негізгі сервистер мен мүмкіндіктер.{% else %}Основные активы и сервисы, которые доступны преподавателям и студентам.{% endif %}</p>
+      </div>
+      <div class="infra-grid">
+        <div class="info-card">
+          <div class="icon-badge"><i class="bi bi-collection"></i></div>
+          <h5>{% if current_lang == 'kz' %}Цифрлық материалдар{% else %}Цифровые материалы{% endif %}</h5>
+          <div class="text-muted">{% if current_lang == 'kz' %}Дәрістер, презентациялар және видеолар — топтарға жедел қолжетімділікпен.{% else %}Лекции, презентации и видео с быстрым доступом для групп.{% endif %}</div>
+        </div>
+        <div class="info-card">
+          <div class="icon-badge"><i class="bi bi-ui-checks-grid"></i></div>
+          <h5>{% if current_lang == 'kz' %}Тестілеу және бақылау{% else %}Тестирование и контроль{% endif %}</h5>
+          <div class="text-muted">{% if current_lang == 'kz' %}Тест құрып, уақытты шектеп, нәтижелерді бақылаңыз.{% else %}Создавайте тесты, ограничивайте время и следите за результатами.{% endif %}</div>
+        </div>
+        <div class="info-card">
+          <div class="icon-badge"><i class="bi bi-activity"></i></div>
+          <h5>{% if current_lang == 'kz' %}Нәтиже аналитикасы{% else %}Аналитика результатов{% endif %}</h5>
+          <div class="text-muted">{% if current_lang == 'kz' %}Тақырыптар мен деңгейлер бойынша прогресс, студенттерге арналған ұсыныстар.{% else %}Прогресс по темам и сложностям, рекомендации для студентов.{% endif %}</div>
+        </div>
+        <div class="info-card">
+          <div class="icon-badge"><i class="bi bi-people"></i></div>
+          <h5>{% if current_lang == 'kz' %}Топтарды басқару{% else %}Управление группами{% endif %}</h5>
+          <div class="text-muted">{% if current_lang == 'kz' %}Кураторлар, кесте және ағымдар бойынша сегментация.{% else %}Кураторы, расписания и сегментация по потокам.{% endif %}</div>
+        </div>
+        <div class="info-card">
+          <div class="icon-badge"><i class="bi bi-shield-check"></i></div>
+          <h5>{% if current_lang == 'kz' %}Қауіпсіз қолжетімділік{% else %}Безопасный доступ{% endif %}</h5>
+          <div class="text-muted">{% if current_lang == 'kz' %}Пайдаланушылар санаттарына сай рөлдер мен қолжетімділік деңгейлері.{% else %}Роли и уровни доступа для каждой категории пользователей.{% endif %}</div>
+        </div>
+        <div class="info-card">
+          <div class="icon-badge"><i class="bi bi-cloud-arrow-up"></i></div>
+          <h5>{% if current_lang == 'kz' %}Контент қоймасы{% else %}Хранилище контента{% endif %}</h5>
+          <div class="text-muted">{% if current_lang == 'kz' %}Жылдам жүктеу және форматтарға шектеусіз қолдау.{% else %}Быстрая загрузка и поддержка форматов без ограничений.{% endif %}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-light" id="services">
+    <div class="section-inner">
+      <div class="text-center">
+        <span class="hero-pill">{% if current_lang == 'kz' %}Негізгі қызметтер{% else %}Основные услуги{% endif %}</span>
+        <h2 class="section-title">{% if current_lang == 'kz' %}Оқыту циклі толық{% else %}Полный цикл обучения{% endif %}</h2>
+        <p class="section-subtitle">{% if current_lang == 'kz' %}Сабақты жоспарлаудан бастап қорытынды аналитикаға дейін — барлық процесс бір сервисте.{% else %}От планирования занятий до итоговой аналитики — все процессы в одном сервисе.{% endif %}</p>
+      </div>
+      <div class="service-grid">
+        <div class="step-card text-center">
+          <div class="step-index">1</div>
+          <h5>{% if current_lang == 'kz' %}Курсты жоспарлау{% else %}Планирование курса{% endif %}</h5>
+          <div class="text-muted">{% if current_lang == 'kz' %}Бағдарлама, тақырып және кесте құрыңыз.{% else %}Составляйте программы, темы и расписания.{% endif %}</div>
+        </div>
+        <div class="step-card text-center">
+          <div class="step-index">2</div>
+          <h5>{% if current_lang == 'kz' %}Материал жүктеу{% else %}Загрузка материалов{% endif %}</h5>
+          <div class="text-muted">{% if current_lang == 'kz' %}Видео, файл және презентациялар — әрдайым қолжетімді.{% else %}Видео, файлы и презентации всегда под рукой.{% endif %}</div>
+        </div>
+        <div class="step-card text-center">
+          <div class="step-index">3</div>
+          <h5>{% if current_lang == 'kz' %}Аралық тесттер{% else %}Промежуточные тесты{% endif %}</h5>
+          <div class="text-muted">{% if current_lang == 'kz' %}Тақырып бақылауы, уақыт шектеуі.{% else %}Контроль тем, ограничения по времени.{% endif %}</div>
+        </div>
+        <div class="step-card text-center">
+          <div class="step-index">4</div>
+          <h5>{% if current_lang == 'kz' %}Жеке есептер{% else %}Индивидуальные отчеты{% endif %}</h5>
+          <div class="text-muted">{% if current_lang == 'kz' %}Тақырыптар бойынша күшті және әлсіз жақтар.{% else %}Сильные и слабые стороны по темам.{% endif %}</div>
+        </div>
+        <div class="step-card text-center">
+          <div class="step-index">5</div>
+          <h5>{% if current_lang == 'kz' %}Қорытынды аналитика{% else %}Итоговая аналитика{% endif %}</h5>
+          <div class="text-muted">{% if current_lang == 'kz' %}Жинақталған есептер және даму бойынша ұсыныстар.{% else %}Сводные отчеты и рекомендации по росту.{% endif %}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-dark" id="contact">
+    <div class="section-inner cta-block rounded-4">
+      <h2 class="section-title">{% if current_lang == 'kz' %}Жұмысты бастауға дайынсыз ба?{% else %}Готовы начать работу?{% endif %}</h2>
+      <p class="section-subtitle">{% if current_lang == 'kz' %}Жеке ұсыныс пен қызмет құнын есептеу үшін бізге хабарласыңыз.{% else %}Свяжитесь с нами для получения индивидуального предложения и расчета стоимости услуг.{% endif %}</p>
+      <a href="#login" class="btn btn-lg">{% if current_lang == 'kz' %}Есеп сұрау{% else %}Запросить расчет{% endif %}</a>
+      <div class="mt-4 d-flex justify-content-center gap-4 flex-wrap">
+        <div>
+          <div class="h4 mb-1">500+</div>
+          <div class="text-muted">{% if current_lang == 'kz' %}риза студент{% else %}довольных студентов{% endif %}</div>
+        </div>
+        <div>
+          <div class="h4 mb-1">15 000+</div>
+          <div class="text-muted">{% if current_lang == 'kz' %}өңделген тест{% else %}обработанных тестов{% endif %}</div>
+        </div>
+        <div>
+          <div class="h4 mb-1">24/7</div>
+          <div class="text-muted">{% if current_lang == 'kz' %}платформа қолдауы{% else %}поддержка платформы{% endif %}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="login-footer">
+    <div class="section-inner py-0">
+      <div class="footer-grid">
+        <div>
+          <div class="login-brand mb-3">
+            <span class="brand-mark"><i class="bi bi-mortarboard"></i></span>
+            <div>
+              <div>{% if current_lang == 'kz' %}Білім беру орталығы{% else %}Образовательный центр{% endif %}</div>
+              <small class="text-muted">{% if current_lang == 'kz' %}ҰБТ дайындығы{% else %}Подготовка к ЕНТ{% endif %}</small>
+            </div>
+          </div>
+          <div>{% if current_lang == 'kz' %}Оқытушылар мен студенттерге арналған заманауи платформа.{% else %}Современная платформа для преподавателей и студентов.{% endif %}</div>
+        </div>
+        <div>
+          <div class="fw-semibold mb-2">{% if current_lang == 'kz' %}Қызметтер{% else %}Услуги{% endif %}</div>
+          <div>{% if current_lang == 'kz' %}Материалдар және курстар{% else %}Материалы и курсы{% endif %}</div>
+          <div>{% if current_lang == 'kz' %}Тестілеу{% else %}Тестирование{% endif %}</div>
+          <div>{% if current_lang == 'kz' %}Аналитика{% else %}Аналитика{% endif %}</div>
+        </div>
+        <div>
+          <div class="fw-semibold mb-2">{% if current_lang == 'kz' %}Компания{% else %}Компания{% endif %}</div>
+          <div>{% if current_lang == 'kz' %}Орталық туралы{% else %}О центре{% endif %}</div>
+          <div>{% if current_lang == 'kz' %}Инфрақұрылым{% else %}Инфраструктура{% endif %}</div>
+          <div>{% if current_lang == 'kz' %}Байланыс{% else %}Контакты{% endif %}</div>
+        </div>
+        <div>
+          <div class="fw-semibold mb-2">{% if current_lang == 'kz' %}Байланыс{% else %}Контакты{% endif %}</div>
+          <div><i class="bi bi-telephone me-2"></i>+7 (777) 123-45-67</div>
+          <div><i class="bi bi-envelope me-2"></i>info@ent-center.kz</div>
+          <div><i class="bi bi-geo-alt me-2"></i>{% if current_lang == 'kz' %}Қазақстан{% else %}Казахстан{% endif %}</div>
+        </div>
+      </div>
+      <div class="mt-4 d-flex flex-wrap justify-content-between align-items-center">
+        <div>{% if current_lang == 'kz' %}© 2026 Білім беру орталығы. Барлық құқықтар қорғалған.{% else %}© 2026 Образовательный центр. Все права защищены.{% endif %}</div>
+        <div class="d-flex gap-3">
+          <span>{% if current_lang == 'kz' %}Құпиялылық саясаты{% else %}Политика конфиденциальности{% endif %}</span>
+          <span>{% if current_lang == 'kz' %}Пайдалану шарттары{% else %}Условия использования{% endif %}</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
 {% endblock %}

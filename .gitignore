@@ -1,0 +1,11 @@
+.env
+.env.*
+venv/
+__pycache__/
+*.pyc
+uploads/
+instance/
+.DS_Store
+.idea/
+database.db
+app_fixed_snapshot.txt

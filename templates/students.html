@@ -20,6 +20,10 @@
           <input type="text" class="form-control" id="name" name="name" required>
         </div>
         <div class="col-md-4">
+          <label for="username" class="form-label">Логин</label>
+          <input type="text" class="form-control" id="username" name="username" placeholder="student01">
+        </div>
+        <div class="col-md-4">
           <label for="email" class="form-label">Email</label>
           <input type="email" class="form-control" id="email" name="email" required>
         </div>
@@ -50,6 +54,7 @@
             <tr>
               <th>ID</th>
               <th>Имя</th>
+              <th>Логин</th>
               <th>Email</th>
               <th>Группа</th>
               <th>Действия</th>
@@ -60,6 +65,7 @@
             <tr>
               <td>{{ student.id }}</td>
               <td>{{ student.name }}</td>
+              <td>{{ student.user.username if student.user else '—' }}</td>
               <td>{{ student.email }}</td>
               <td>
                 {% if student.group %}

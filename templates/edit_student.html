@@ -13,6 +13,10 @@
         <input type="text" class="form-control" id="name" name="name" value="{{ student.name }}" required>
       </div>
       <div class="mb-3">
+        <label for="username" class="form-label">Логин</label>
+        <input type="text" class="form-control" id="username" name="username" value="{{ student.user.username if student.user else '' }}">
+      </div>
+      <div class="mb-3">
         <label for="email" class="form-label">Email</label>
         <input type="email" class="form-control" id="email" name="email" value="{{ student.email }}" required>
       </div>
@@ -27,6 +31,10 @@
       </div>
       <button type="submit" class="btn btn-primary">Сохранить</button>
       <a href="{{ url_for('students') }}" class="btn btn-secondary">Отмена</a>
+    </form>
+    <hr class="my-4">
+    <form method="POST" action="{{ url_for('reset_student_temp_password', id=student.id) }}" onsubmit="return confirm('Отправить ссылку для установки пароля?')">
+      <button type="submit" class="btn btn-outline-warning">Отправить ссылку для установки пароля</button>
     </form>
   </div>
 </div>

@@ -1,0 +1,148 @@
+{% extends 'student_base.html' if current_user_obj and current_user_obj.role == 'student' else 'base.html' %}
+
+{% block title %}Домашние задания{% endblock %}
+
+{% block content %}
+<div class="page-hero mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+  <div>
+    <h1 class="mb-1">Домашние задания</h1>
+    <p class="mb-0">Задания по вашим курсам с дедлайнами.</p>
+  </div>
+</div>
+
+{% if current_user_obj and current_user_obj.role in ['admin','teacher'] %}
+<div class="card mb-4">
+  <div class="card-header"><h5 class="mb-0">Создать домашнее задание</h5></div>
+  <div class="card-body">
+    <form method="POST" enctype="multipart/form-data">
+      <div class="row g-3">
+        <div class="col-md-5">
+          <label for="title" class="form-label">Название</label>
+          <input type="text" class="form-control" id="title" name="title" required>
+        </div>
+        <div class="col-md-4">
+          <label for="course_id" class="form-label">Курс</label>
+          <select id="course_id" name="course_id" class="form-select" required>
+            <option value="" disabled selected>Выберите курс</option>
+            {% for c in courses %}
+              <option value="{{ c.id }}">{{ c.title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="1" id="is_published" name="is_published">
+            <label class="form-check-label" for="is_published">Опубликовать</label>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <label for="due_at" class="form-label">Дедлайн</label>
+          <input type="datetime-local" class="form-control" id="due_at" name="due_at">
+        </div>
+        <div class="col-md-12">
+          <label for="homework_text" class="form-label">Описание / Задание</label>
+          <textarea id="homework_text" name="homework_text" class="form-control" rows="2"></textarea>
+        </div>
+        <div class="col-md-12">
+          <label for="homework_file" class="form-label">Файл / Фото</label>
+          <input id="homework_file" name="homework_file" type="file" class="form-control">
+        </div>
+      </div>
+      <div class="mt-3">
+        <button type="submit" class="btn btn-primary">Создать</button>
+      </div>
+    </form>
+  </div>
+  </div>
+{% endif %}
+
+{% if current_user_obj and current_user_obj.role == 'student' %}
+<div class="card border-0 shadow-sm mb-3">
+  <div class="card-body">
+    <div class="d-flex flex-wrap gap-2">
+      <a class="btn btn-sm {{ 'btn-primary' if not selected_course else 'btn-outline-primary' }}" href="{{ url_for('homework') }}">Все курсы</a>
+      {% for c in courses %}
+        <a class="btn btn-sm {{ 'btn-primary' if selected_course and selected_course.id == c.id else 'btn-outline-primary' }}" href="{{ url_for('homework', course_id=c.id) }}">{{ c.title }}</a>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    {% if current_user_obj and current_user_obj.role == 'student' and not selected_course %}
+      <p class="text-muted mb-0">Выберите курс, чтобы увидеть задания.</p>
+    {% elif homeworks %}
+      <div class="row g-3">
+        {% for h in homeworks %}
+        <div class="col-md-4">
+          <div class="surface h-100 p-3 d-flex flex-column">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <span class="badge-soft text-uppercase small">{{ h.course.title }}</span>
+              {% if h.due_at %}
+                <span class="text-muted small">
+                  <i class="bi bi-calendar2-event me-1"></i>{{ h.due_at.strftime('%Y-%m-%d %H:%M') }}
+                </span>
+              {% endif %}
+            </div>
+            <h6 class="mb-1">{{ h.title }}</h6>
+            {% if h.homework_text %}<div class="text-muted small mb-2">{{ h.homework_text }}</div>{% endif %}
+            {% if h.homework_file_path %}
+              <div class="mb-2">
+                <a class="btn btn-outline-primary btn-sm" href="{{ url_for('homework_attachment', test_id=h.id) }}">Скачать файл</a>
+              </div>
+            {% endif %}
+            {% if h.due_at %}
+              <div class="text-muted small mb-2">
+                <i class="bi bi-hourglass-split me-1"></i>
+                <span class="hw-timer" data-remaining="{{ h.remaining_seconds or 0 }}"></span>
+              </div>
+            {% endif %}
+            <div class="mt-auto d-flex justify-content-between align-items-center">
+              <span></span>
+              {% if current_user_obj and current_user_obj.role == 'student' %}
+                <a href="{{ url_for('homework_submit', test_id=h.id) }}" class="btn btn-primary btn-sm">Сдать</a>
+              {% else %}
+                <a href="{{ url_for('test_results', test_id=h.id) }}" class="btn btn-outline-primary btn-sm">Результаты</a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-muted mb-0">Пока нет заданий.</p>
+    {% endif %}
+  </div>
+  </div>
+
+{% if current_user_obj and current_user_obj.role == 'student' %}
+<script>
+  (function(){
+    function fmt(sec){
+      if (sec <= 0) return 'Дедлайн прошёл';
+      var d = Math.floor(sec / 86400);
+      var h = Math.floor((sec % 86400) / 3600);
+      var m = Math.floor((sec % 3600) / 60);
+      var s = sec % 60;
+      var parts = [];
+      if (d) parts.push(d + 'д');
+      if (h || d) parts.push(h + 'ч');
+      if (m || h || d) parts.push(m + 'м');
+      parts.push(s + 'с');
+      return 'Осталось: ' + parts.join(' ');
+    }
+    function tick(){
+      document.querySelectorAll('.hw-timer').forEach(function(el){
+        var remain = parseInt(el.getAttribute('data-remaining') || '0', 10);
+        el.textContent = fmt(remain);
+        if (remain > 0) el.setAttribute('data-remaining', remain - 1);
+      });
+      setTimeout(tick, 1000);
+    }
+    tick();
+  })();
+</script>
+{% endif %}
+{% endblock %}

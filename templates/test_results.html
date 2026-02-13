@@ -7,35 +7,80 @@
 
 <div class="card">
   <div class="card-body">
-    {% if attempts %}
-      <div class="table-responsive">
-        <table class="table table-striped align-middle">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Студент</th>
-              <th>Начат</th>
-              <th>Завершён</th>
-              <th>Баллы</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for a in attempts %}
+    {% if test.is_homework %}
+      {% if submissions %}
+        <div class="table-responsive">
+          <table class="table table-striped align-middle">
+            <thead>
               <tr>
-                <td>{{ a.id }}</td>
-                <td>{{ a.student.name if a.student else '-' }}</td>
-                <td>{{ a.started_at.strftime('%Y-%m-%d %H:%M') if a.started_at else '-' }}</td>
-                <td>{{ a.finished_at.strftime('%Y-%m-%d %H:%M') if a.finished_at else '-' }}</td>
-                <td>{{ a.score }}</td>
+                <th>ID</th>
+                <th>Студент</th>
+                <th>Отправлено</th>
+                <th>Текст</th>
+                <th>Файл</th>
+                <th>Балл</th>
+                <th></th>
               </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {% for s in submissions %}
+                <tr>
+                  <td>{{ s.id }}</td>
+                  <td>{{ s.student.name if s.student else '-' }}</td>
+                  <td>{{ s.submitted_at.strftime('%Y-%m-%d %H:%M') if s.submitted_at else '-' }}</td>
+                  <td>{{ s.text or '-' }}</td>
+                  <td>
+                    {% if s.file_path %}
+                      <a href="{{ url_for('homework_download', submission_id=s.id) }}">Скачать</a>
+                    {% else %}
+                      -
+                    {% endif %}
+                  </td>
+                  <td>{{ s.score if s.score is not none else '-' }}</td>
+                  <td>
+                    <form method="POST" action="{{ url_for('grade_homework', submission_id=s.id) }}" class="d-flex gap-2">
+                      <input type="number" class="form-control form-control-sm" name="score" value="{{ s.score if s.score is not none else '' }}" placeholder="Баллы">
+                      <button class="btn btn-sm btn-outline-primary" type="submit">Сохранить</button>
+                    </form>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="text-muted mb-0">Пока нет попыток.</p>
+      {% endif %}
     {% else %}
-      <p class="text-muted mb-0">Пока нет попыток.</p>
+      {% if attempts %}
+        <div class="table-responsive">
+          <table class="table table-striped align-middle">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Студент</th>
+                <th>Начат</th>
+                <th>Завершён</th>
+                <th>Баллы</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for a in attempts %}
+                <tr>
+                  <td>{{ a.id }}</td>
+                  <td>{{ a.student.name if a.student else '-' }}</td>
+                  <td>{{ a.started_at.strftime('%Y-%m-%d %H:%M') if a.started_at else '-' }}</td>
+                  <td>{{ a.finished_at.strftime('%Y-%m-%d %H:%M') if a.finished_at else '-' }}</td>
+                  <td>{{ a.score }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="text-muted mb-0">Пока нет попыток.</p>
+      {% endif %}
     {% endif %}
   </div>
   </div>
 {% endblock %}
-

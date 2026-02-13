@@ -1,0 +1,59 @@
+{% extends 'student_base.html' if current_user_obj and current_user_obj.role == 'student' else 'base.html' %}
+{% block title %}Опрос по ЕНТ{% endblock %}
+{% block content %}
+<div class="surface mb-3 ai-intro">
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+    <div>
+      <h2 class="mb-1">Опрос по правилам</h2>
+      <p class="text-muted mb-0">Ответьте на вопросы и получите ТОП-3 рекомендованных специальностей по ЕНТ.</p>
+    </div>
+    <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('ai_result') }}"><i class="bi bi-clock-history me-1"></i>Последний результат</a>
+  </div>
+</div>
+
+<form method="post">
+  {% for q in questions %}
+  <div class="surface mb-3 ai-question">
+    <div class="d-flex align-items-center justify-content-between">
+      <h5 class="mb-0">Вопрос {{ loop.index }}.</h5>
+      <span class="badge text-bg-light">Обязательный</span>
+    </div>
+    <p class="mb-3">{{ q.text }}</p>
+    <div class="list-group">
+      {% for ans in q.answers %}
+      <label class="list-group-item list-group-item-action">
+        <input class="form-check-input me-2" type="radio" name="question_{{ q.id }}" value="{{ ans.id }}" required>
+        {{ ans.text }}
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+  <div class="d-flex justify-content-end">
+    <button type="submit" class="btn btn-primary"><i class="bi bi-magic me-1"></i>Получить рекомендации</button>
+  </div>
+</form>
+
+<div class="surface mt-4">
+  <h6 class="mb-2 text-muted">Какие комбинации доступны</h6>
+  <div class="row g-3">
+    {% for key, meta in combinations.items() %}
+    <div class="col-md-4">
+      <div class="p-3 border rounded-3 h-100">
+        <div class="fw-semibold">{{ meta.title }}</div>
+        <div class="text-muted small mb-2">{{ meta.description }}</div>
+        <div class="small text-muted">Карьерные треки: {{ meta.careers|join(', ') }}</div>
+        {% if meta.faculties %}
+        <div class="small text-muted mt-1">Направления: {{ meta.faculties|join(', ') }}</div>
+        {% endif %}
+        {% if meta.specialties %}
+        <div class="small text-muted mt-1">Специальностей: {{ meta.specialties|length }}. Примеры:
+          {% for s in meta.specialties[:3] %}{{ s.title }}{% if not loop.last %}, {% endif %}{% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

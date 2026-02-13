@@ -3,26 +3,82 @@
 {% block title %}Главная{% endblock %}
 
 {% block content %}
-<h1 class="mb-3">Добро пожаловать{% if student %}, {{ student.name }}{% endif %}</h1>
+<div class="page-hero mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+  <div>
+    <h1 class="mb-1">Сәлем{% if student %}, {{ student.name }}{% endif %}!</h1>
+    <p class="mb-0">Твои курсы, тесты и новые материалы собраны здесь.</p>
+  </div>
+</div>
+
 <div class="row g-3">
   <div class="col-md-4">
-    <div class="card h-100">
-      <div class="card-body">
-        <div class="h5">Курсы</div>
-        <div class="display-6">{{ total_courses }}</div>
+    <div class="card h-100 stat-card">
+      <div class="card-body d-flex justify-content-between align-items-center">
+        <div>
+          <div class="icon-badge mb-2"><i class="bi bi-journal-text"></i></div>
+          <div class="text-muted small">Курсы</div>
+          <h3 class="mb-0">{{ total_courses }}</h3>
+        </div>
+        <a href="{{ url_for('student_materials') }}" class="btn btn-outline-primary btn-sm">Материалы</a>
       </div>
-      <div class="card-footer bg-transparent"><a href="{{ url_for('student_materials') }}" class="btn btn-sm btn-primary">Материалы</a></div>
+      <div class="bg-shape"></div>
     </div>
   </div>
   <div class="col-md-4">
-    <div class="card h-100">
-      <div class="card-body">
-        <div class="h5">Тесты</div>
-        <p class="mb-0">Доступные тесты по вашим курсам</p>
+    <div class="card h-100 stat-card">
+      <div class="card-body d-flex justify-content-between align-items-center">
+        <div>
+          <div class="icon-badge mb-2"><i class="bi bi-ui-checks-grid"></i></div>
+          <div class="text-muted small">Тесты</div>
+          <p class="mb-1 small text-muted">Готовься и проверяй знания</p>
+        </div>
+        <a href="{{ url_for('available_tests') }}" class="btn btn-outline-primary btn-sm">К тестам</a>
       </div>
-      <div class="card-footer bg-transparent"><a href="{{ url_for('available_tests') }}" class="btn btn-sm btn-primary">К тестам</a></div>
+      <div class="bg-shape"></div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card h-100 stat-card">
+      <div class="card-body d-flex justify-content-between align-items-center">
+        <div>
+          <div class="icon-badge mb-2"><i class="bi bi-clipboard-data"></i></div>
+          <div class="text-muted small">Аналитика</div>
+          <p class="mb-1 small text-muted">Смотри свой прогресс</p>
+        </div>
+        <a href="{{ url_for('student_analytics') }}" class="btn btn-outline-primary btn-sm">Открыть</a>
+      </div>
+      <div class="bg-shape"></div>
     </div>
   </div>
 </div>
-{% endblock %}
 
+<div class="card border-0 shadow-sm mt-3">
+  <div class="card-header d-flex align-items-center justify-content-between">
+    <strong>Мои предметы</strong>
+    <a class="btn btn-outline-primary btn-sm" href="{{ url_for('student_materials') }}">Материалы</a>
+  </div>
+  <div class="card-body">
+    {% if courses %}
+      <div class="row g-3">
+        {% for c in courses %}
+        <div class="col-md-4">
+          <div class="surface h-100 p-3 d-flex flex-column">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <span class="badge-soft text-uppercase small">Курс</span>
+              <i class="bi bi-journal-text"></i>
+            </div>
+            <h6 class="mb-1">{{ c.title }}</h6>
+            {% if c.description %}<p class="text-muted small mb-3">{{ c.description }}</p>{% endif %}
+            <div class="mt-auto d-flex justify-content-between align-items-center">
+              <a href="{{ url_for('available_tests') }}" class="btn btn-primary btn-sm">Тесты</a>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-muted mb-0">Пока нет назначенных предметов. Они появятся, когда администратор добавит их в твою группу.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

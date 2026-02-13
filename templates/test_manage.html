@@ -5,38 +5,72 @@
 {% block content %}
 <h1 class="mb-3">Тест: {{ test.title }}</h1>
 
-<div class="mb-3"><span class="badge bg-{{ 'success' if test.is_published else 'secondary' }}">{{ 'Опубликован' if test.is_published else 'Черновик' }}</span> · Курс: {{ test.course.title }}</div>
+<div class="mb-3">
+  <span class="badge bg-{{ 'success' if test.is_published else 'secondary' }}">{{ 'Опубликован' if test.is_published else 'Черновик' }}</span>
+  · Курс: {{ test.course.title }}
+  {% if test.is_homework %}· <span class="badge bg-info text-dark">Домашнее задание</span>{% endif %}
+  {% if test.due_at %}· <span class="text-muted small">Дедлайн: {{ test.due_at.strftime('%Y-%m-%d %H:%M') }}</span>{% endif %}
+</div>
 
 <form method="POST" action="{{ url_for('toggle_publish_test', test_id=test.id) }}" class="mb-3">
   <button class="btn btn-sm btn-outline-primary" type="submit">Переключить публикацию</button>
   <a href="{{ url_for('test_results', test_id=test.id) }}" class="btn btn-sm btn-outline-secondary ms-2">Результаты</a>
   <a href="{{ url_for('tests') }}" class="btn btn-sm btn-outline-dark ms-2">Назад</a>
   </form>
+{% set token = make_action_token('toggle_publish_test', {'test_id': test.id}) %}
+<a href="{{ url_for('confirm_get', token=token) }}" class="btn btn-sm btn-warning mb-3">Изменить публикацию (с подтверждением)</a>
 
 <div class="card mb-4">
   <div class="card-header"><h5 class="mb-0">Добавить вопрос</h5></div>
   <div class="card-body">
-    <form method="POST" action="{{ url_for('add_question', test_id=test.id) }}">
+    <form method="POST" action="{{ url_for('add_question', test_id=test.id) }}" enctype="multipart/form-data">
+      <div class="row g-3 mb-3">
+        <div class="col-md-6">
+          <label class="form-label" for="topic">Тема</label>
+          <input id="topic" name="topic" class="form-control" placeholder="напр., Алгебра">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="difficulty">Сложность</label>
+          <select id="difficulty" name="difficulty" class="form-select">
+            <option value="">-</option>
+            <option value="easy">Легко</option>
+            <option value="medium">Средне</option>
+            <option value="hard">Сложно</option>
+          </select>
+        </div>
+      </div>
       <div class="mb-3">
         <label class="form-label" for="text">Текст вопроса</label>
-        <textarea id="text" name="text" class="form-control" rows="2" required></textarea>
+        <textarea id="text" name="text" class="form-control" rows="2"></textarea>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="question_image">Изображение вопроса</label>
+        <input id="question_image" name="question_image" type="file" class="form-control" accept="image/*">
       </div>
       <div class="row g-2">
         <div class="col-md-6">
           <label class="form-label" for="opt1">Вариант 1</label>
-          <input id="opt1" name="opt1" class="form-control" required>
+          <input id="opt1" name="opt1" class="form-control">
+          <label class="form-label mt-2" for="opt1_image">Изображение варианта 1</label>
+          <input id="opt1_image" name="opt1_image" type="file" class="form-control" accept="image/*">
         </div>
         <div class="col-md-6">
           <label class="form-label" for="opt2">Вариант 2</label>
-          <input id="opt2" name="opt2" class="form-control" required>
+          <input id="opt2" name="opt2" class="form-control">
+          <label class="form-label mt-2" for="opt2_image">Изображение варианта 2</label>
+          <input id="opt2_image" name="opt2_image" type="file" class="form-control" accept="image/*">
         </div>
         <div class="col-md-6">
           <label class="form-label" for="opt3">Вариант 3</label>
           <input id="opt3" name="opt3" class="form-control">
+          <label class="form-label mt-2" for="opt3_image">Изображение варианта 3</label>
+          <input id="opt3_image" name="opt3_image" type="file" class="form-control" accept="image/*">
         </div>
         <div class="col-md-6">
           <label class="form-label" for="opt4">Вариант 4</label>
           <input id="opt4" name="opt4" class="form-control">
+          <label class="form-label mt-2" for="opt4_image">Изображение варианта 4</label>
+          <input id="opt4_image" name="opt4_image" type="file" class="form-control" accept="image/*">
         </div>
       </div>
       <div class="mt-3">
@@ -64,12 +98,25 @@
       <ol class="mb-0">
         {% for q in test.questions %}
           <li class="mb-2">
-            <div class="fw-semibold">{{ q.text }}</div>
-            <ul class="mb-2">
+            {% if q.text %}<div class="fw-semibold">{{ q.text }}</div>{% endif %}
+            {% if q.image_path %}
+              <div class="mt-2">
+                <img src="{{ url_for('test_image', filename=q.image_path) }}" alt="question image" class="img-fluid rounded border">
+              </div>
+            {% endif %}
+            <ol class="mb-2">
               {% for o in q.options %}
-                <li>{{ o.text }} {% if o.is_correct %}<span class="badge bg-success">верно</span>{% endif %}</li>
+                <li class="mb-2">
+                  {% if o.text %}{{ o.text }}{% endif %}
+                  {% if o.image_path %}
+                    <div class="mt-2">
+                      <img src="{{ url_for('test_image', filename=o.image_path) }}" alt="option image" class="img-fluid rounded border">
+                    </div>
+                  {% endif %}
+                  {% if o.is_correct %}<span class="badge bg-success">верно</span>{% endif %}
+                </li>
               {% endfor %}
-            </ul>
+            </ol>
           </li>
         {% endfor %}
       </ol>

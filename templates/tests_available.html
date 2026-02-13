@@ -1,28 +1,52 @@
-{% extends 'base.html' %}
+{% extends 'student_base.html' %}
 
 {% block title %}Доступные тесты{% endblock %}
 
 {% block content %}
-<h1 class="mb-3">Доступные тесты</h1>
+<div class="page-hero mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+  <div>
+    <h1 class="mb-1">Доступные тесты</h1>
+    <p class="mb-0">Тесты по вашим курсам. Успехов!</p>
+  </div>
+</div>
 
-<div class="card">
+<div class="card border-0 shadow-sm mb-3">
   <div class="card-body">
-    {% if tests %}
-      <ul class="list-group">
+    <div class="d-flex flex-wrap gap-2">
+      <a class="btn btn-sm {{ 'btn-primary' if not selected_course else 'btn-outline-primary' }}" href="{{ url_for('available_tests') }}">Все курсы</a>
+      {% for c in courses %}
+        <a class="btn btn-sm {{ 'btn-primary' if selected_course and selected_course.id == c.id else 'btn-outline-primary' }}" href="{{ url_for('available_tests', course_id=c.id) }}">{{ c.title }}</a>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    {% if not selected_course %}
+      <p class="text-muted mb-0">Выберите курс, чтобы увидеть тесты.</p>
+    {% elif tests %}
+      <div class="row g-3">
         {% for t in tests %}
-          <li class="list-group-item d-flex justify-content-between align-items-center">
-            <div>
-              <div class="fw-semibold">{{ t.title }}</div>
-              <div class="text-muted small">Курс: {{ t.course.title }}</div>
+        <div class="col-md-4">
+          <div class="surface h-100 p-3 d-flex flex-column">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <span class="badge-soft text-uppercase small">{{ t.course.title }}</span>
+              {% if t.duration_minutes %}<span class="text-muted small"><i class="bi bi-stopwatch me-1"></i>{{ t.duration_minutes }} мин</span>{% endif %}
             </div>
-            <a href="{{ url_for('start_test', test_id=t.id) }}" class="btn btn-primary btn-sm">Начать</a>
-          </li>
+            <h6 class="mb-1">{{ t.title }}</h6>
+            <div class="text-muted small mb-3">Вопросов: {{ t.questions|length }}</div>
+            <div class="mt-auto d-flex justify-content-between align-items-center">
+              <span class="text-muted small"><i class="bi bi-lightning-charge-fill me-1"></i>Готов?</span>
+              <a href="{{ url_for('start_test', test_id=t.id) }}" class="btn btn-primary btn-sm">Начать</a>
+            </div>
+          </div>
+        </div>
         {% endfor %}
-      </ul>
+      </div>
     {% else %}
       <p class="text-muted mb-0">Нет доступных тестов.</p>
     {% endif %}
   </div>
   </div>
 {% endblock %}
-

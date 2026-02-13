@@ -6,8 +6,9 @@ from datetime import datetime
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
-    password = db.Column(db.String(150), nullable=False)
+    password = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(20), nullable=False, default='admin')
+    must_change_password = db.Column(db.Boolean, nullable=False, default=False)
 
 
 class Lecture(db.Model):
@@ -16,6 +17,9 @@ class Lecture(db.Model):
     surname = db.Column(db.String(100), nullable=False, unique=True)
     title = db.Column(db.String(100), nullable=False, unique=True)
     description = db.Column(db.Text)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+
+    user = db.relationship('User', foreign_keys=[user_id])
 
 
 class Department(db.Model):
@@ -91,6 +95,9 @@ class Material(db.Model):
 
     course = db.relationship('Course', backref=db.backref('materials', lazy=True))
     uploader = db.relationship('User', foreign_keys=[uploaded_by])
+    # content type and external hosting
+    material_type = db.Column(db.String(20), nullable=False, default='other')
+    external_url = db.Column(db.String(500))
 
 
 # Quiz/Test models
@@ -102,20 +109,32 @@ class Test(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     course = db.relationship('Course', backref=db.backref('tests', lazy=True))
+    # ENT settings
+    duration_minutes = db.Column(db.Integer)
+    one_way = db.Column(db.Boolean, default=False, nullable=False)
+    due_at = db.Column(db.DateTime)
+    is_homework = db.Column(db.Boolean, default=False, nullable=False)
+    homework_text = db.Column(db.Text)
+    homework_file_path = db.Column(db.String(300))
 
 
 class Question(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     test_id = db.Column(db.Integer, db.ForeignKey('test.id'), nullable=False)
     text = db.Column(db.Text, nullable=False)
+    image_path = db.Column(db.String(255))
 
     test = db.relationship('Test', backref=db.backref('questions', lazy=True, cascade='all, delete-orphan'))
+    # analytics/adaptive fields
+    topic = db.Column(db.String(100))
+    difficulty = db.Column(db.String(10))
 
 
 class Option(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
     text = db.Column(db.String(500), nullable=False)
+    image_path = db.Column(db.String(255))
     is_correct = db.Column(db.Boolean, default=False, nullable=False)
 
     question = db.relationship('Question', backref=db.backref('options', lazy=True, cascade='all, delete-orphan'))
@@ -143,6 +162,46 @@ class AttemptAnswer(db.Model):
     question = db.relationship('Question')
     option = db.relationship('Option')
 
+
+class HomeworkSubmission(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    test_id = db.Column(db.Integer, db.ForeignKey('test.id'), nullable=False)
+    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
+    text = db.Column(db.Text)
+    file_path = db.Column(db.String(300))
+    submitted_at = db.Column(db.DateTime, default=datetime.utcnow)
+    score = db.Column(db.Integer)
+
+    test = db.relationship('Test', backref=db.backref('homework_submissions', lazy=True, cascade='all, delete-orphan'))
+    student = db.relationship('Student')
+
+
+class AIQuestion(db.Model):
+    __tablename__ = 'ai_question'
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.String(500), nullable=False)
+
+    answers = db.relationship('AIAnswer', backref='question', lazy=True, cascade='all, delete-orphan')
+
+
+class AIAnswer(db.Model):
+    __tablename__ = 'ai_answer'
+    id = db.Column(db.Integer, primary_key=True)
+    question_id = db.Column(db.Integer, db.ForeignKey('ai_question.id'), nullable=False)
+    text = db.Column(db.String(500), nullable=False)
+    # JSON with weights per ENT combination, e.g. {"math_inf":3,"math_phys":1}
+    scores = db.Column(db.JSON, nullable=False, default=dict)
+
+
+class AIResult(db.Model):
+    __tablename__ = 'ai_result'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    scores = db.Column(db.JSON, nullable=False, default=dict)
+    top_combinations = db.Column(db.JSON, nullable=False, default=list)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', foreign_keys=[user_id])
 
 
 
