@@ -620,6 +620,16 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(TEST_IMAGE_FOLDER, exist_ok=True)
 os.makedirs(HOMEWORK_UPLOAD_FOLDER, exist_ok=True)
 
+# Auto-run migrations on startup (useful when Shell access is unavailable)
+if os.environ.get('AUTO_MIGRATE') == '1':
+    try:
+        from flask_migrate import upgrade
+        with app.app_context():
+            upgrade()
+    except Exception as exc:
+        print('AUTO_MIGRATE failed:', exc)
+        raise
+
 
 # Helpers
 def current_user():
