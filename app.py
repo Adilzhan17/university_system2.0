@@ -626,6 +626,18 @@ if os.environ.get('AUTO_MIGRATE') == '1':
         from flask_migrate import upgrade
         with app.app_context():
             upgrade()
+            # Ensure a default admin exists on fresh databases
+            if User.query.count() == 0:
+                admin_username = os.environ.get('ADMIN_USERNAME', 'admin')
+                admin_password = os.environ.get('ADMIN_PASSWORD', 'admin123')
+                admin = User(
+                    username=admin_username,
+                    password=generate_password_hash(admin_password),
+                    role='admin',
+                    must_change_password=False,
+                )
+                db.session.add(admin)
+                db.session.commit()
     except Exception as exc:
         print('AUTO_MIGRATE failed:', exc)
         raise
