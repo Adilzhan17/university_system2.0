@@ -1115,6 +1115,16 @@ body {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
+  .nav-rail .offcanvas-header {
+    padding: .6rem .9rem;
+  }
+  .nav-rail .offcanvas-body {
+    padding: .4rem .5rem;
+  }
+  .nav-rail .nav-link {
+    margin: .15rem .25rem;
+    padding: .55rem .75rem;
+  }
   .page-hero {
     padding: 1.1rem;
   }
