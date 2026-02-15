@@ -1106,6 +1106,15 @@ body {
   .nav-rail {
     min-height: auto;
   }
+  .nav-rail {
+    max-height: 100vh;
+    overflow: hidden;
+  }
+  .nav-rail .offcanvas-body {
+    max-height: calc(100vh - 56px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
   .page-hero {
     padding: 1.1rem;
   }
