@@ -7,13 +7,21 @@
   apply(saved || 'light');
   const btn = document.getElementById('themeToggle');
   if (btn) {
+    const isAnimated = btn.classList.contains('theme-toggle-anim');
+    const setBtnState = (theme) => {
+      btn.setAttribute('data-theme', theme);
+      btn.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+      if (!isAnimated) {
+        btn.innerHTML = theme === 'dark' ? '<i class="bi bi-sun"></i>' : '<i class="bi bi-moon-stars"></i>';
+      }
+    };
     btn.addEventListener('click', function () {
       const current = root.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
       apply(current);
       localStorage.setItem(key, current);
-      this.innerHTML = current === 'dark' ? '<i class="bi bi-sun"></i>' : '<i class="bi bi-moon-stars"></i>';
+      setBtnState(current);
     });
-    btn.innerHTML = (saved === 'dark') ? '<i class="bi bi-sun"></i>' : '<i class="bi bi-moon-stars"></i>';
+    setBtnState(saved || 'light');
   }
 })();
 
@@ -58,3 +66,21 @@
   });
 })();
 
+// Ensure offcanvas close button always works (some custom styles can block it)
+(function () {
+  function findOffcanvas(el) {
+    return el.closest(
+      '.offcanvas, .offcanvas-start, .offcanvas-end, .offcanvas-top, .offcanvas-bottom,' +
+      '.offcanvas-sm, .offcanvas-md, .offcanvas-lg, .offcanvas-xl, .offcanvas-xxl'
+    );
+  }
+
+  document.addEventListener('click', function (e) {
+    const btn = e.target.closest('.btn-close[data-bs-dismiss="offcanvas"]');
+    if (!btn) return;
+    const offcanvasEl = findOffcanvas(btn);
+    if (!offcanvasEl || typeof bootstrap === 'undefined') return;
+    const instance = bootstrap.Offcanvas.getInstance(offcanvasEl) || new bootstrap.Offcanvas(offcanvasEl);
+    instance.hide();
+  });
+})();

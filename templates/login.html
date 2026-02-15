@@ -5,9 +5,7 @@
 {% block content %}
    </div>
 <div class="login-page">
-  <section class="hero-block" id="home">
-    <div class="section-inner">
-      <nav class="login-nav">
+  <nav class="login-nav">
         <div class="login-brand">
           <span class="brand-mark"><i class="bi bi-mortarboard"></i></span>
           <div>
@@ -19,20 +17,55 @@
           <a href="#about">{% if current_lang == 'kz' %}Орталық туралы{% else %}О центре{% endif %}</a>
           <a href="#infra">{% if current_lang == 'kz' %}Инфрақұрылым{% else %}Инфраструктура{% endif %}</a>
           <a href="#services">{% if current_lang == 'kz' %}Қызметтер{% else %}Услуги{% endif %}</a>
+          <a href="#reviews">{% if current_lang == 'kz' %}Пікірлер{% else %}Отзывы{% endif %}</a>
           <a href="#contact">{% if current_lang == 'kz' %}Байланыс{% else %}Контакты{% endif %}</a>
         </div>
         <div class="nav-actions">
+          <button class="theme-toggle-anim" id="themeToggle" type="button" aria-label="Toggle theme">
+            <span class="toggle-track">
+              <span class="toggle-icon sun"><i class="bi bi-sun-fill"></i></span>
+              <span class="toggle-icon moon"><i class="bi bi-moon-stars-fill"></i></span>
+              <span class="toggle-thumb"></span>
+            </span>
+          </button>
           <a class="ghost-btn" href="{{ url_for('set_lang', lang='kz', next=request.full_path) }}">Қаз</a>
           <a class="ghost-btn" href="{{ url_for('set_lang', lang='ru', next=request.full_path) }}">Рус</a>
           <a class="btn btn-primary" href="#login">{% if current_lang == 'kz' %}Кіру{% else %}Войти{% endif %}</a>
         </div>
-      </nav>
+  </nav>
+
+  <section class="hero-block magic-grid magic-noise" id="home">
+    <div class="magic-orbs" aria-hidden="true">
+      <span class="orb orb-1"></span>
+      <span class="orb orb-2"></span>
+      <span class="orb orb-3"></span>
+    </div>
+    <div class="magic-meteors" aria-hidden="true">
+      <span class="meteor m1"></span>
+      <span class="meteor m2"></span>
+      <span class="meteor m3"></span>
+      <span class="meteor m4"></span>
+      <span class="meteor m5"></span>
+    </div>
+    <div class="magic-sparks" aria-hidden="true">
+      <span class="spark s1"></span>
+      <span class="spark s2"></span>
+      <span class="spark s3"></span>
+      <span class="spark s4"></span>
+      <span class="spark s5"></span>
+      <span class="spark s6"></span>
+      <span class="spark s7"></span>
+      <span class="spark s8"></span>
+      <span class="spark s9"></span>
+      <span class="spark s10"></span>
+    </div>
+    <div class="section-inner">
 
       <div class="hero-grid">
         <div>
           <span class="hero-pill">{% if current_lang == 'kz' %}Біртұтас оқу платформасы{% else %}Единая платформа обучения{% endif %}</span>
-          <h1 class="hero-title">{% if current_lang == 'kz' %}ҰБТ-ға дайындық пен топтарды басқару — бір жүйеде{% else %}Подготовка к ЕНТ и управление группами в одном окне{% endif %}</h1>
-          <p class="hero-subtitle">{% if current_lang == 'kz' %}Материалдар, тесттер, аналитика және студенттерді сүйемелдеу — ұстаздар мен оқушыларға арналған барлық құралдар бір кеңістікте.{% else %}Материалы, тесты, аналитика и сопровождение студентов — все инструменты для преподавателей и учеников в едином пространстве.{% endif %}</p>
+          <h1 class="hero-title magic-fade">{% if current_lang == 'kz' %}ҰБТ-ға дайындық пен топтарды басқару — бір жүйеде{% else %}Подготовка к ЕНТ и управление группами в одном окне{% endif %}</h1>
+          <p class="hero-subtitle magic-fade">{% if current_lang == 'kz' %}Материалдар, тесттер, аналитика және студенттерді сүйемелдеу — ұстаздар мен оқушыларға арналған барлық құралдар бір кеңістікте.{% else %}Материалы, тесты, аналитика и сопровождение студентов — все инструменты для преподавателей и учеников в едином пространстве.{% endif %}</p>
           <div class="hero-actions">
             <a href="#login" class="btn btn-primary">{% if current_lang == 'kz' %}Бастау{% else %}Начать работу{% endif %}</a>
             <a href="#about" class="ghost-btn">{% if current_lang == 'kz' %}Платформа туралы{% else %}О платформе{% endif %}</a>
@@ -53,7 +86,7 @@
           </div>
         </div>
         <div class="hero-panel">
-          <div class="login-card" id="login">
+          <div class="login-card magic-card magic-fade magic-tilt magic-beam" id="login">
             <div class="mb-3 text-center">
               <h3 class="mb-1">{% if current_lang == 'kz' %}Жүйеге кіру{% else %}Вход в систему{% endif %}</h3>
               <p class="text-muted mb-0">{% if current_lang == 'kz' %}Платформамен жұмысты бастаңыз{% else %}Начните работу с платформой{% endif %}</p>
@@ -74,7 +107,7 @@
                 <label for="password" class="form-label">{% if current_lang == 'kz' %}Құпиясөз{% else %}Пароль{% endif %}</label>
                 <input type="password" class="form-control" id="password" name="password" placeholder="admin123" required>
               </div>
-              <button type="submit" class="btn btn-primary w-100">{% if current_lang == 'kz' %}Кіру{% else %}Войти{% endif %}</button>
+              <button type="submit" class="btn btn-primary w-100 magic-shimmer">{% if current_lang == 'kz' %}Кіру{% else %}Войти{% endif %}</button>
             </form>
             <div class="text-center small mb-3">
               <a href="{{ url_for('student_reset_password') }}">
@@ -103,7 +136,7 @@
     </div>
   </section>
 
-  <section class="section-dark" id="about">
+  <section class="section-dark magic-reveal" id="about">
     <div class="section-inner">
       <div class="row g-4 align-items-center">
         <div class="col-lg-6">
@@ -129,7 +162,7 @@
     </div>
   </section>
 
-  <section class="section-dark" id="infra">
+  <section class="section-dark magic-reveal" id="infra">
     <div class="section-inner">
       <div class="text-center">
         <span class="hero-pill">{% if current_lang == 'kz' %}Инфрақұрылым{% else %}Инфраструктура{% endif %}</span>
@@ -171,7 +204,7 @@
     </div>
   </section>
 
-  <section class="section-light" id="services">
+  <section class="section-light magic-reveal" id="services">
     <div class="section-inner">
       <div class="text-center">
         <span class="hero-pill">{% if current_lang == 'kz' %}Негізгі қызметтер{% else %}Основные услуги{% endif %}</span>
@@ -208,7 +241,255 @@
     </div>
   </section>
 
-  <section class="section-dark" id="contact">
+  <section class="section-light magic-reveal" id="reviews">
+    <div class="section-inner">
+      <div class="text-center">
+        <span class="hero-pill">{% if current_lang == 'kz' %}Нақты пікірлер{% else %}Реальные отзывы{% endif %}</span>
+        <h2 class="section-title">{% if current_lang == 'kz' %}Ата-аналар мен оқушылардың видео пікірлері{% else %}Видео-отзывы родителей и учеников{% endif %}</h2>
+        <p class="section-subtitle">{% if current_lang == 'kz' %}Нәтижелер, атмосфера және қолдау туралы қысқа пікірлер.{% else %}Короткие впечатления о результатах, атмосфере и поддержке.{% endif %}</p>
+      </div>
+      <div class="reviews-marquee">
+        <div class="marquee" style="--duration:40s; --gap:18px;">
+          <div class="marquee-track">
+            <article class="review-card">
+              <div class="review-video">
+                <video muted autoplay loop playsinline preload="metadata">
+                  <source src="https://cdn.magicui.design/marquee.mp4" type="video/mp4">
+                </video>
+                <span class="review-badge">{% if current_lang == 'kz' %}Ата-ана{% else %}Родитель{% endif %}</span>
+              </div>
+              <div class="review-body">
+                <div class="review-name">Айдана · {% if current_lang == 'kz' %}Айсұлудың анасы{% else %}мама Айсулы{% endif %}</div>
+                <div class="review-score">
+                  <span class="score-pill">{% if current_lang == 'kz' %}ҰБТ 128/140{% else %}ЕНТ 128/140{% endif %}</span>
+                  <span class="score-pill">{% if current_lang == 'kz' %}+34 ұпай{% else %}+34 балла{% endif %}</span>
+                </div>
+                <p>{% if current_lang == 'kz' %}Қызымыздың сенімі артты, тұрақты бақылау мен кері байланыс ерекше ұнады.{% else %}У дочери выросла уверенность, понравились регулярный контроль и обратная связь.{% endif %}</p>
+              </div>
+            </article>
+            <article class="review-card">
+              <div class="review-video">
+                <video muted autoplay loop playsinline preload="metadata">
+                  <source src="https://cdn.magicui.design/marquee.mp4" type="video/mp4">
+                </video>
+                <span class="review-badge">{% if current_lang == 'kz' %}Оқушы{% else %}Ученик{% endif %}</span>
+              </div>
+              <div class="review-body">
+                <div class="review-name">Даниал · 11-{% if current_lang == 'kz' %}сынып{% else %}класс{% endif %}</div>
+                <div class="review-score">
+                  <span class="score-pill">{% if current_lang == 'kz' %}Нәтиже +29 ұпай{% else %}Результат +29 баллов{% endif %}</span>
+                  <span class="score-pill">{% if current_lang == 'kz' %}Математика{% else %}Математика{% endif %}</span>
+                </div>
+                <p>{% if current_lang == 'kz' %}Апта сайынғы тесттер прогресті айқын көрсетті, тақырыптарға қайта оралу оңай.{% else %}Еженедельные тесты показывали прогресс, удобно возвращаться к темам.{% endif %}</p>
+              </div>
+            </article>
+            <article class="review-card">
+              <div class="review-video">
+                <video muted autoplay loop playsinline preload="metadata">
+                  <source src="https://cdn.magicui.design/marquee.mp4" type="video/mp4">
+                </video>
+                <span class="review-badge">{% if current_lang == 'kz' %}Ата-ана{% else %}Родитель{% endif %}</span>
+              </div>
+              <div class="review-body">
+                <div class="review-name">Руслан · {% if current_lang == 'kz' %}Әлиханның әкесі{% else %}папа Алихана{% endif %}</div>
+                <div class="review-score">
+                  <span class="score-pill">{% if current_lang == 'kz' %}ҰБТ 122/140{% else %}ЕНТ 122/140{% endif %}</span>
+                  <span class="score-pill">{% if current_lang == 'kz' %}Физика{% else %}Физика{% endif %}</span>
+                </div>
+                <p>{% if current_lang == 'kz' %}Платформада бәрі түсінікті: сабақ, үй жұмысы, есептер — бәрі бір жерден.{% else %}Платформа понятная: уроки, домашние задания, отчеты — все в одном месте.{% endif %}</p>
+              </div>
+            </article>
+            <article class="review-card">
+              <div class="review-video">
+                <video muted autoplay loop playsinline preload="metadata">
+                  <source src="https://cdn.magicui.design/marquee.mp4" type="video/mp4">
+                </video>
+                <span class="review-badge">{% if current_lang == 'kz' %}Оқушы{% else %}Ученик{% endif %}</span>
+              </div>
+              <div class="review-body">
+                <div class="review-name">Салтанат · 10-{% if current_lang == 'kz' %}сынып{% else %}класс{% endif %}</div>
+                <div class="review-score">
+                  <span class="score-pill">{% if current_lang == 'kz' %}Тарих{% else %}История{% endif %}</span>
+                  <span class="score-pill">{% if current_lang == 'kz' %}+18 ұпай{% else %}+18 баллов{% endif %}</span>
+                </div>
+                <p>{% if current_lang == 'kz' %}Тақырыптық талдау мен ұсыныстар өте көмектесті, әлсіз тұстар жабылды.{% else %}Тематический анализ и рекомендации помогли закрыть слабые места.{% endif %}</p>
+              </div>
+            </article>
+          </div>
+          <div class="marquee-track" aria-hidden="true">
+            <article class="review-card">
+              <div class="review-video">
+                <video muted autoplay loop playsinline preload="metadata">
+                  <source src="https://cdn.magicui.design/marquee.mp4" type="video/mp4">
+                </video>
+                <span class="review-badge">{% if current_lang == 'kz' %}Ата-ана{% else %}Родитель{% endif %}</span>
+              </div>
+              <div class="review-body">
+                <div class="review-name">Айдана · {% if current_lang == 'kz' %}Айсұлудың анасы{% else %}мама Айсулы{% endif %}</div>
+                <div class="review-score">
+                  <span class="score-pill">{% if current_lang == 'kz' %}ҰБТ 128/140{% else %}ЕНТ 128/140{% endif %}</span>
+                  <span class="score-pill">{% if current_lang == 'kz' %}+34 ұпай{% else %}+34 балла{% endif %}</span>
+                </div>
+                <p>{% if current_lang == 'kz' %}Қызымыздың сенімі артты, тұрақты бақылау мен кері байланыс ерекше ұнады.{% else %}У дочери выросла уверенность, понравились регулярный контроль и обратная связь.{% endif %}</p>
+              </div>
+            </article>
+            <article class="review-card">
+              <div class="review-video">
+                <video muted autoplay loop playsinline preload="metadata">
+                  <source src="https://cdn.magicui.design/marquee.mp4" type="video/mp4">
+                </video>
+                <span class="review-badge">{% if current_lang == 'kz' %}Оқушы{% else %}Ученик{% endif %}</span>
+              </div>
+              <div class="review-body">
+                <div class="review-name">Даниал · 11-{% if current_lang == 'kz' %}сынып{% else %}класс{% endif %}</div>
+                <div class="review-score">
+                  <span class="score-pill">{% if current_lang == 'kz' %}Нәтиже +29 ұпай{% else %}Результат +29 баллов{% endif %}</span>
+                  <span class="score-pill">{% if current_lang == 'kz' %}Математика{% else %}Математика{% endif %}</span>
+                </div>
+                <p>{% if current_lang == 'kz' %}Апта сайынғы тесттер прогресті айқын көрсетті, тақырыптарға қайта оралу оңай.{% else %}Еженедельные тесты показывали прогресс, удобно возвращаться к темам.{% endif %}</p>
+              </div>
+            </article>
+            <article class="review-card">
+              <div class="review-video">
+                <video muted autoplay loop playsinline preload="metadata">
+                  <source src="https://cdn.magicui.design/marquee.mp4" type="video/mp4">
+                </video>
+                <span class="review-badge">{% if current_lang == 'kz' %}Ата-ана{% else %}Родитель{% endif %}</span>
+              </div>
+              <div class="review-body">
+                <div class="review-name">Руслан · {% if current_lang == 'kz' %}Әлиханның әкесі{% else %}папа Алихана{% endif %}</div>
+                <div class="review-score">
+                  <span class="score-pill">{% if current_lang == 'kz' %}ҰБТ 122/140{% else %}ЕНТ 122/140{% endif %}</span>
+                  <span class="score-pill">{% if current_lang == 'kz' %}Физика{% else %}Физика{% endif %}</span>
+                </div>
+                <p>{% if current_lang == 'kz' %}Платформада бәрі түсінікті: сабақ, үй жұмысы, есептер — бәрі бір жерден.{% else %}Платформа понятная: уроки, домашние задания, отчеты — все в одном месте.{% endif %}</p>
+              </div>
+            </article>
+            <article class="review-card">
+              <div class="review-video">
+                <video muted autoplay loop playsinline preload="metadata">
+                  <source src="https://cdn.magicui.design/marquee.mp4" type="video/mp4">
+                </video>
+                <span class="review-badge">{% if current_lang == 'kz' %}Оқушы{% else %}Ученик{% endif %}</span>
+              </div>
+              <div class="review-body">
+                <div class="review-name">Салтанат · 10-{% if current_lang == 'kz' %}сынып{% else %}класс{% endif %}</div>
+                <div class="review-score">
+                  <span class="score-pill">{% if current_lang == 'kz' %}Тарих{% else %}История{% endif %}</span>
+                  <span class="score-pill">{% if current_lang == 'kz' %}+18 ұпай{% else %}+18 баллов{% endif %}</span>
+                </div>
+                <p>{% if current_lang == 'kz' %}Тақырыптық талдау мен ұсыныстар өте көмектесті, әлсіз тұстар жабылды.{% else %}Тематический анализ и рекомендации помогли закрыть слабые места.{% endif %}</p>
+              </div>
+            </article>
+          </div>
+        </div>
+        <div class="marquee reverse" style="--duration:46s; --gap:18px;">
+          <div class="marquee-track">
+            <article class="review-card compact">
+              <div class="review-video">
+                <video muted autoplay loop playsinline preload="metadata">
+                  <source src="https://cdn.magicui.design/marquee.mp4" type="video/mp4">
+                </video>
+                <span class="review-badge">{% if current_lang == 'kz' %}Оқушы{% else %}Ученик{% endif %}</span>
+              </div>
+              <div class="review-body">
+                <div class="review-name">Аружан · 11-{% if current_lang == 'kz' %}сынып{% else %}класс{% endif %}</div>
+                <p>{% if current_lang == 'kz' %}Тірі сабақтар мен жазбалар қатар болғандықтан, бір де бір тақырып бос қалмады.{% else %}Благодаря живым урокам и записям не осталось пробелов по темам.{% endif %}</p>
+              </div>
+            </article>
+            <article class="review-card compact">
+              <div class="review-video">
+                <video muted autoplay loop playsinline preload="metadata">
+                  <source src="https://cdn.magicui.design/marquee.mp4" type="video/mp4">
+                </video>
+                <span class="review-badge">{% if current_lang == 'kz' %}Ата-ана{% else %}Родитель{% endif %}</span>
+              </div>
+              <div class="review-body">
+                <div class="review-name">Жанат · {% if current_lang == 'kz' %}Бекжанның әкесі{% else %}папа Бекжана{% endif %}</div>
+                <p>{% if current_lang == 'kz' %}Мұғалімдер әр оқушыға жеке уақыт бөледі, нәтижесі бірден көрінеді.{% else %}Преподаватели уделяют внимание каждому, прогресс заметен сразу.{% endif %}</p>
+              </div>
+            </article>
+            <article class="review-card compact">
+              <div class="review-video">
+                <video muted autoplay loop playsinline preload="metadata">
+                  <source src="https://cdn.magicui.design/marquee.mp4" type="video/mp4">
+                </video>
+                <span class="review-badge">{% if current_lang == 'kz' %}Оқушы{% else %}Ученик{% endif %}</span>
+              </div>
+              <div class="review-body">
+                <div class="review-name">Ерасыл · 10-{% if current_lang == 'kz' %}сынып{% else %}класс{% endif %}</div>
+                <p>{% if current_lang == 'kz' %}Үй тапсырмасы нақты, платформа ескертеді, жоспарды ұстану жеңіл.{% else %}Домашка понятная, платформа напоминает, следовать плану легко.{% endif %}</p>
+              </div>
+            </article>
+            <article class="review-card compact">
+              <div class="review-video">
+                <video muted autoplay loop playsinline preload="metadata">
+                  <source src="https://cdn.magicui.design/marquee.mp4" type="video/mp4">
+                </video>
+                <span class="review-badge">{% if current_lang == 'kz' %}Ата-ана{% else %}Родитель{% endif %}</span>
+              </div>
+              <div class="review-body">
+                <div class="review-name">Сауле · {% if current_lang == 'kz' %}Мадинаның анасы{% else %}мама Мадины{% endif %}</div>
+                <p>{% if current_lang == 'kz' %}Ай сайынғы есептер бойынша қай пәнге назар аудару керек екенін түсіндік.{% else %}Ежемесячные отчеты помогли понять, на какие предметы делать упор.{% endif %}</p>
+              </div>
+            </article>
+          </div>
+          <div class="marquee-track" aria-hidden="true">
+            <article class="review-card compact">
+              <div class="review-video">
+                <video muted autoplay loop playsinline preload="metadata">
+                  <source src="https://cdn.magicui.design/marquee.mp4" type="video/mp4">
+                </video>
+                <span class="review-badge">{% if current_lang == 'kz' %}Оқушы{% else %}Ученик{% endif %}</span>
+              </div>
+              <div class="review-body">
+                <div class="review-name">Аружан · 11-{% if current_lang == 'kz' %}сынып{% else %}класс{% endif %}</div>
+                <p>{% if current_lang == 'kz' %}Тірі сабақтар мен жазбалар қатар болғандықтан, бір де бір тақырып бос қалмады.{% else %}Благодаря живым урокам и записям не осталось пробелов по темам.{% endif %}</p>
+              </div>
+            </article>
+            <article class="review-card compact">
+              <div class="review-video">
+                <video muted autoplay loop playsinline preload="metadata">
+                  <source src="https://cdn.magicui.design/marquee.mp4" type="video/mp4">
+                </video>
+                <span class="review-badge">{% if current_lang == 'kz' %}Ата-ана{% else %}Родитель{% endif %}</span>
+              </div>
+              <div class="review-body">
+                <div class="review-name">Жанат · {% if current_lang == 'kz' %}Бекжанның әкесі{% else %}папа Бекжана{% endif %}</div>
+                <p>{% if current_lang == 'kz' %}Мұғалімдер әр оқушыға жеке уақыт бөледі, нәтижесі бірден көрінеді.{% else %}Преподаватели уделяют внимание каждому, прогресс заметен сразу.{% endif %}</p>
+              </div>
+            </article>
+            <article class="review-card compact">
+              <div class="review-video">
+                <video muted autoplay loop playsinline preload="metadata">
+                  <source src="https://cdn.magicui.design/marquee.mp4" type="video/mp4">
+                </video>
+                <span class="review-badge">{% if current_lang == 'kz' %}Оқушы{% else %}Ученик{% endif %}</span>
+              </div>
+              <div class="review-body">
+                <div class="review-name">Ерасыл · 10-{% if current_lang == 'kz' %}сынып{% else %}класс{% endif %}</div>
+                <p>{% if current_lang == 'kz' %}Үй тапсырмасы нақты, платформа ескертеді, жоспарды ұстану жеңіл.{% else %}Домашка понятная, платформа напоминает, следовать плану легко.{% endif %}</p>
+              </div>
+            </article>
+            <article class="review-card compact">
+              <div class="review-video">
+                <video muted autoplay loop playsinline preload="metadata">
+                  <source src="https://cdn.magicui.design/marquee.mp4" type="video/mp4">
+                </video>
+                <span class="review-badge">{% if current_lang == 'kz' %}Ата-ана{% else %}Родитель{% endif %}</span>
+              </div>
+              <div class="review-body">
+                <div class="review-name">Сауле · {% if current_lang == 'kz' %}Мадинаның анасы{% else %}мама Мадины{% endif %}</div>
+                <p>{% if current_lang == 'kz' %}Ай сайынғы есептер бойынша қай пәнге назар аудару керек екенін түсіндік.{% else %}Ежемесячные отчеты помогли понять, на какие предметы делать упор.{% endif %}</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-dark magic-reveal" id="contact">
     <div class="section-inner cta-block rounded-4">
       <h2 class="section-title">{% if current_lang == 'kz' %}Жұмысты бастауға дайынсыз ба?{% else %}Готовы начать работу?{% endif %}</h2>
       <p class="section-subtitle">{% if current_lang == 'kz' %}Жеке ұсыныс пен қызмет құнын есептеу үшін бізге хабарласыңыз.{% else %}Свяжитесь с нами для получения индивидуального предложения и расчета стоимости услуг.{% endif %}</p>
@@ -272,4 +553,55 @@
     </div>
   </footer>
 </div>
+{% endblock %}
+
+{% block body_scripts %}
+<script>
+  (() => {
+    const card = document.querySelector(".login-card.magic-card");
+    if (!card) return;
+
+    const setPos = (clientX, clientY) => {
+      const rect = card.getBoundingClientRect();
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+      card.style.setProperty("--mx", `${x}px`);
+      card.style.setProperty("--my", `${y}px`);
+    };
+
+    card.addEventListener("mousemove", (e) => {
+      setPos(e.clientX, e.clientY);
+      const rect = card.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top) / rect.height;
+      const tiltX = (0.5 - y) * 6;
+      const tiltY = (x - 0.5) * 6;
+      card.style.transform = `perspective(900px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+    });
+    card.addEventListener("touchmove", (e) => {
+      if (e.touches && e.touches[0]) {
+        setPos(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    }, { passive: true });
+    card.addEventListener("mouseleave", () => {
+      card.style.setProperty("--mx", "50%");
+      card.style.setProperty("--my", "30%");
+      card.style.transform = "perspective(900px) rotateX(0deg) rotateY(0deg)";
+    });
+  })();
+
+  (() => {
+    const items = document.querySelectorAll(".magic-reveal");
+    if (!items.length) return;
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.18 });
+    items.forEach((el) => io.observe(el));
+  })();
+</script>
 {% endblock %}
