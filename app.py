@@ -41,6 +41,12 @@ if db_url:
     app.config['SQLALCHEMY_DATABASE_URI'] = _normalize_db_url(db_url)
 else:
     app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql+psycopg2://lms_user:1234@localhost:5432/lms_db"
+
+# Avoid stale SSL connections on managed Postgres
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    "pool_pre_ping": True,
+    "pool_recycle": 300,
+}
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Uploads
